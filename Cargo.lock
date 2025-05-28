@@ -1379,6 +1379,9 @@ dependencies = [
 [[package]]
 name = "bj6_game"
 version = "0.0.0"
+dependencies = [
+ "bevy",
+]
 
 [[package]]
 name = "blake3"
