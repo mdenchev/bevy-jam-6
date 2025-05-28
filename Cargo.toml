@@ -6,6 +6,9 @@ edition = "2024"
 
 [lib]
 
+[workspace]
+members = ["crates/*"]
+
 [dependencies]
 
 # Compile with Performance Optimizations:
