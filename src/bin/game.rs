@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bj6_game::GamePlugin;
+use bevy_game_jam_6::game::GamePlugin;
 
 fn main() {
     let mut app = App::new();

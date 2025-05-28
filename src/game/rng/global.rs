@@ -2,7 +2,7 @@ use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
 
-use crate::{PRNG, Seed};
+use crate::game::rng::{PRNG, Seed};
 use bevy_prng::WyRand;
 use bevy_rand::prelude::{GlobalEntropy, GlobalRngEntity, RngSeed};
 use rand_core::SeedableRng;
@@ -36,7 +36,7 @@ pub(crate) fn plugin(app: &mut App) {}
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{RngPlugin, SEED_LEN, ZERO_SEED};
+    use crate::game::rng::{RngPlugin, SEED_LEN, ZERO_SEED};
     use bevy::ecs::system::RunSystemOnce;
     use rand_core::RngCore;
 

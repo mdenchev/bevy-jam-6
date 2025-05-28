@@ -672,8 +672,12 @@ name = "bevy_game_jam_6"
 version = "0.0.0"
 dependencies = [
  "bevy",
- "bj6_game",
- "bj6_rng",
+ "bevy_auto_plugin",
+ "bevy_prng",
+ "bevy_rand",
+ "log",
+ "rand_core 0.9.3",
+ "tracing",
 ]
 
 [[package]]
@@ -1505,26 +1509,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1b8e56985ec62d17e9c1001dc89c88ecd7dc08e47eba5ec7c29c7b5eeecde967"
 dependencies = [
  "serde",
-]
-
-[[package]]
-name = "bj6_game"
-version = "0.0.0"
-dependencies = [
- "bevy",
- "bevy_auto_plugin",
- "bj6_rng",
-]
-
-[[package]]
-name = "bj6_rng"
-version = "0.0.0"
-dependencies = [
- "bevy",
- "bevy_auto_plugin",
- "bevy_prng",
- "bevy_rand",
- "rand_core 0.9.3",
 ]
 
 [[package]]
