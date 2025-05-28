@@ -577,6 +577,7 @@ name = "bevy_game_jam_6"
 version = "0.0.0"
 dependencies = [
  "bevy",
+ "bj6_game",
 ]
 
 [[package]]

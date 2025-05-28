@@ -10,9 +10,11 @@ edition = "2024"
 members = ["crates/*"]
 
 [workspace.dependencies]
+bj6_game = { path = "crates/bj6_game" }
 bevy = { version = "0.16", features = ["glam_assert", "serialize"] }
 
 [dependencies]
+bj6_game = { workspace = true }
 bevy = { workspace = true }
 
 # Compile with Performance Optimizations:
