@@ -1,5 +1,7 @@
 mod camera;
 mod demo;
+#[cfg(feature = "dev")]
+mod dev;
 mod rng;
 mod screen;
 
@@ -21,6 +23,8 @@ impl Plugin for GamePlugin {
         app.add_plugins(FrameCountLogPrefixPlugin);
         app.add_plugins(RngPlugin);
         app.add_plugins(camera::plugin);
+        #[cfg(feature = "dev")]
+        app.add_plugins(dev::plugin);
         app.add_plugins(demo::plugin);
         app.add_plugins(screen::plugin);
     }
