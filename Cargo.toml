@@ -9,6 +9,8 @@ edition = "2024"
 [workspace]
 members = ["crates/*"]
 
+[workspace.dependencies]
+
 [dependencies]
 
 # Compile with Performance Optimizations:
