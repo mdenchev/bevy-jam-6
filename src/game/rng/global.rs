@@ -2,7 +2,7 @@ use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
 
-use crate::game::rng::{PRNG, Seed};
+use crate::game::rng::{Prng, Seed};
 use bevy_prng::WyRand;
 use bevy_rand::prelude::{GlobalEntropy, GlobalRngEntity, RngSeed};
 use rand_core::SeedableRng;
@@ -10,17 +10,17 @@ use rand_core::SeedableRng;
 #[derive(SystemParam)]
 pub struct GlobalRng<'w, 's> {
     #[allow(dead_code)]
-    pub rng: GlobalEntropy<'w, PRNG>,
+    pub rng: GlobalEntropy<'w, Prng>,
     #[allow(dead_code)]
-    pub global: GlobalRngEntity<'w, 's, PRNG>,
+    pub global: GlobalRngEntity<'w, 's, Prng>,
 }
 
 #[allow(dead_code)]
 impl<'w> GlobalRng<'w, '_> {
-    pub fn rng(&mut self) -> &mut GlobalEntropy<'w, PRNG> {
+    pub fn rng(&mut self) -> &mut GlobalEntropy<'w, Prng> {
         &mut self.rng
     }
-    pub fn seed(&self) -> &RngSeed<PRNG> {
+    pub fn seed(&self) -> &RngSeed<Prng> {
         self.global.seed()
     }
     pub fn seed_bytes(&self) -> Seed {
