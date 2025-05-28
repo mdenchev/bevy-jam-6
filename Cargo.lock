@@ -668,11 +668,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_frame_count_log_prefix"
+version = "0.0.0"
+source = "git+https://github.com/StrikeForceZero/bevy_frame_count_log_prefix?branch=main#8a43dd3f765e9b629bf4aa928ba5b4b89cb4c655"
+dependencies = [
+ "bevy_app",
+ "bevy_diagnostic",
+ "bevy_ecs",
+ "bevy_log",
+ "tracing",
+ "tracing-log",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "bevy_game_jam_6"
 version = "0.0.0"
 dependencies = [
  "bevy",
  "bevy_auto_plugin",
+ "bevy_frame_count_log_prefix",
  "bevy_prng",
  "bevy_rand",
  "log",

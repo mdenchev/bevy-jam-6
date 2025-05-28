@@ -9,6 +9,7 @@ edition = "2024"
 [dependencies]
 bevy = { version = "0.16", features = ["glam_assert", "serialize"] }
 bevy_auto_plugin = { version = "0.2.1", features = ["nightly_pre_2025_04_16"] }
+bevy_frame_count_log_prefix = { git = "https://github.com/StrikeForceZero/bevy_frame_count_log_prefix", branch = "main", features = ["fixed_update"], optional = true }
 bevy_rand = { version = "0.11", features = ["bevy_reflect", "serialize", "wyrand"] }
 bevy_prng = { version = "0.11", features = ["bevy_reflect", "serialize", "wyrand"] }
 rand_core = { version = "0.9", features = ["serde"] }
@@ -40,6 +41,10 @@ dev_native = [
     "bevy/file_watcher",
     # Enable embedded asset hot reloading for native dev builds.
     "bevy/embedded_watcher",
+    "dev_frame_count_log"
+]
+dev_frame_count_log = [
+    "bevy_frame_count_log_prefix"
 ]
 wasm = [
     "bevy_rand/wasm_js"
