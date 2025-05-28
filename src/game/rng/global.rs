@@ -30,8 +30,8 @@ impl<'w> GlobalRng<'w, '_> {
     }
 }
 
-#[auto_plugin(app=app)]
-pub(crate) fn plugin(app: &mut App) {}
+#[auto_plugin(app=_app)]
+pub(crate) fn plugin(_app: &mut App) {}
 
 #[cfg(test)]
 mod tests {
