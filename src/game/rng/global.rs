@@ -9,10 +9,13 @@ use rand_core::SeedableRng;
 
 #[derive(SystemParam)]
 pub struct GlobalRng<'w, 's> {
+    #[allow(dead_code)]
     pub rng: GlobalEntropy<'w, PRNG>,
+    #[allow(dead_code)]
     pub global: GlobalRngEntity<'w, 's, PRNG>,
 }
 
+#[allow(dead_code)]
 impl<'w> GlobalRng<'w, '_> {
     pub fn rng(&mut self) -> &mut GlobalEntropy<'w, PRNG> {
         &mut self.rng
