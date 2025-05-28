@@ -1,0 +1,8 @@
+[package]
+name = "bevy_game_jam_6"
+version = "0.0.0"
+edition = "2024"
+
+[lib]
+
+[dependencies]
