@@ -450,6 +450,66 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_auto_plugin"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "42a796a6973b62ae5c52bccdad181a432a329205d638c8a2d9b0f990bfccb69f"
+dependencies = [
+ "bevy_auto_plugin_nightly_proc_macros",
+ "bevy_auto_plugin_proc_macros",
+ "rustc_version",
+]
+
+[[package]]
+name = "bevy_auto_plugin_nightly_proc_macros"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a29c610d7c8619002f263758972ffb0c572b2d6f63e77dffa861aff6ef92747c"
+dependencies = [
+ "bevy_auto_plugin_nightly_shared",
+ "bevy_auto_plugin_shared",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "bevy_auto_plugin_nightly_shared"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "de9f8799d7641ab82342f955d8cc01a6db202667e46c27b9805f18143b408604"
+dependencies = [
+ "bevy_auto_plugin_shared",
+ "proc-macro2",
+ "quote",
+ "syn",
+ "thiserror 2.0.12",
+]
+
+[[package]]
+name = "bevy_auto_plugin_proc_macros"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d975b4a5902e1c6793511db49f21284dabb18876b3374a65639b6f3f35cabe57"
+dependencies = [
+ "bevy_auto_plugin_shared",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "bevy_auto_plugin_shared"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8a895f0b42ab09af7bc1ea197307d770f8481f0841b9206ef8089b6c3b66b854"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "bevy_color"
 version = "0.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1418,6 +1478,7 @@ name = "bj6_game"
 version = "0.0.0"
 dependencies = [
  "bevy",
+ "bevy_auto_plugin",
 ]
 
 [[package]]
@@ -3738,6 +3799,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
 
 [[package]]
+name = "rustc_version"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cfcb3a22ef46e85b45de6ee7e79d063319ebb6594faafcf1c225ea92ab6e9b92"
+dependencies = [
+ "semver",
+]
+
+[[package]]
 name = "rustix"
 version = "0.38.44"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3821,6 +3891,12 @@ name = "self_cell"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0f7d95a54511e0c7be3f51e8867aa8cf35148d7b9445d44de2f943e2b206e749"
+
+[[package]]
+name = "semver"
+version = "1.0.26"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "56e6fa9c48d24d85fb3de5ad847117517440f6beceb7798af16b4a87d616b8d0"
 
 [[package]]
 name = "send_wrapper"
