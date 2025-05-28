@@ -1,4 +1,5 @@
 mod camera;
+mod demo;
 mod rng;
 
 use crate::game::rng::RngPlugin;
@@ -19,6 +20,7 @@ impl Plugin for GamePlugin {
         app.add_plugins(FrameCountLogPrefixPlugin);
         app.add_plugins(RngPlugin);
         app.add_plugins(camera::plugin);
+        app.add_plugins(demo::plugin);
     }
 }
 
