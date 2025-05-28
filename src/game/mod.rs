@@ -1,3 +1,4 @@
+mod camera;
 mod rng;
 
 use crate::game::rng::RngPlugin;
@@ -17,6 +18,7 @@ impl Plugin for GamePlugin {
         #[cfg(feature = "dev_frame_count_log")]
         app.add_plugins(FrameCountLogPrefixPlugin);
         app.add_plugins(RngPlugin);
+        app.add_plugins(camera::plugin);
     }
 }
 
