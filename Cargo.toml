@@ -27,6 +27,25 @@ tracing = { version = "0.1", features = [
 bj6_game = { workspace = true }
 bevy = { workspace = true }
 
+[features]
+# Default to a native dev build.
+default = ["dev_native"]
+dev = [
+    # Improve compile times for dev builds by linking Bevy as a dynamic library.
+    "bevy/dynamic_linking",
+    "bevy/bevy_dev_tools",
+    "bevy/bevy_ui_debug",
+    # Improve error messages coming from Bevy
+    "bevy/track_location",
+]
+dev_native = [
+    "dev",
+    # Enable asset hot reloading for native dev builds.
+    "bevy/file_watcher",
+    # Enable embedded asset hot reloading for native dev builds.
+    "bevy/embedded_watcher",
+]
+
 [package.metadata.bevy_cli.release]
 # Disable dev features for release builds.
 default-features = false
