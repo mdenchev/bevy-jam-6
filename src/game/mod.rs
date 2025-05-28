@@ -41,6 +41,15 @@ fn default_plugins() -> PluginGroupBuilder {
             // See https://github.com/bevyengine/bevy_github_ci_template/issues/48.
             meta_check: AssetMetaCheck::Never,
             ..default()
+        })
+        .set(WindowPlugin {
+            primary_window: Window {
+                title: "Bevy Jam 6".to_string(),
+                fit_canvas_to_parent: true,
+                ..default()
+            }
+            .into(),
+            ..default()
         });
     #[cfg(feature = "dev_frame_count_log")]
     let default_plugins = default_plugins.disable::<LogPlugin>();
