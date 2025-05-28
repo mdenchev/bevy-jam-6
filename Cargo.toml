@@ -13,6 +13,7 @@ bevy_frame_count_log_prefix = { git = "https://github.com/StrikeForceZero/bevy_f
 bevy_rand = { version = "0.11", features = ["bevy_reflect", "serialize", "wyrand"] }
 bevy_prng = { version = "0.11", features = ["bevy_reflect", "serialize", "wyrand"] }
 rand_core = { version = "0.9", features = ["serde"] }
+bevy-inspector-egui = { version = "0.31", features = ["highlight_changes"] }
 # Compile low-severity logs out of native builds for performance.
 log = { version = "0.4", features = [
     "max_level_debug",
