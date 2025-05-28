@@ -1,6 +1,7 @@
 mod camera;
 mod demo;
 mod rng;
+mod screen;
 
 use crate::game::rng::RngPlugin;
 use bevy::app::PluginGroupBuilder;
@@ -21,6 +22,7 @@ impl Plugin for GamePlugin {
         app.add_plugins(RngPlugin);
         app.add_plugins(camera::plugin);
         app.add_plugins(demo::plugin);
+        app.add_plugins(screen::plugin);
     }
 }
 
