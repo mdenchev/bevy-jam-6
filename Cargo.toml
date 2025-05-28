@@ -15,6 +15,7 @@ bevy_prng = { version = "0.11", features = ["bevy_reflect", "serialize", "wyrand
 rand_core = { version = "0.9", features = ["serde"] }
 bevy-inspector-egui = { version = "0.31", features = ["highlight_changes"] }
 egui_dock = { version = "0.16" }
+smart-default = { version = "0.7" }
 # Compile low-severity logs out of native builds for performance.
 log = { version = "0.4", features = [
     "max_level_debug",
