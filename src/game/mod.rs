@@ -1,3 +1,4 @@
+mod asset_tracking;
 mod camera;
 mod demo;
 #[cfg(feature = "dev")]
@@ -26,6 +27,7 @@ impl Plugin for GamePlugin {
         app.add_plugins(camera::plugin);
         #[cfg(feature = "dev")]
         app.add_plugins(dev::plugin);
+        app.add_plugins(asset_tracking::plugin);
         app.add_plugins(demo::plugin);
         app.add_plugins(screen::plugin);
     }
