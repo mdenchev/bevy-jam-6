@@ -1,6 +1,6 @@
 //! The screen state for the main gameplay.
 
-use crate::game::demo::spawn_level;
+use crate::game::demo::level::spawn_level;
 use crate::game::menus::Menu;
 use crate::game::pause_controller::Pause;
 use crate::game::screens::Screen;
