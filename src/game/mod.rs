@@ -27,6 +27,7 @@ impl Plugin for GamePlugin {
     #[auto_plugin(app=app)]
     fn build(&self, app: &mut App) {
         app.add_plugins(default_plugins());
+        app.add_plugins(MeshPickingPlugin);
         #[cfg(feature = "dev_frame_count_log")]
         app.add_plugins(FrameCountLogPrefixPlugin);
         app.add_plugins(RngPlugin);
