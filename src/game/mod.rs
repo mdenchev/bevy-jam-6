@@ -7,6 +7,7 @@ mod dev;
 mod game_system_set;
 mod menus;
 mod pause_controller;
+mod physics;
 mod rng;
 mod screens;
 mod theme;
@@ -35,6 +36,7 @@ impl Plugin for GamePlugin {
         app.add_plugins(dev::plugin);
         app.add_plugins(asset_tracking::plugin);
         app.add_plugins(pause_controller::plugin);
+        app.add_plugins(physics::plugin);
         app.add_plugins(demo::plugin);
         app.add_plugins(audio::plugin);
         app.add_plugins(theme::plugin);
