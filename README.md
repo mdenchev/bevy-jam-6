@@ -3,6 +3,8 @@
 [![License](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/StrikeForceZero/bevy_auto_plugin#license)
 [![CI](https://github.com/StrikeForceZero/bevy-jam-6/workflows/CI/badge.svg)](https://github.com/StrikeForceZero/bevy-jam-6/actions)
 
+This initial template is based heavily on https://github.com/TheBevyFlock/bevy_new_2d
+
 ## License
 
 All code in this repository is dual-licensed under either:
