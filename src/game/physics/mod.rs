@@ -1,5 +1,7 @@
+use crate::game::pause_controller::Pause;
 use avian3d::prelude::{
-    PhysicsDebugPlugin, PhysicsGizmos, PhysicsInterpolationPlugin, PhysicsPlugins,
+    Physics, PhysicsDebugPlugin, PhysicsGizmos, PhysicsInterpolationPlugin, PhysicsPlugins,
+    PhysicsTime,
 };
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
@@ -16,4 +18,10 @@ pub(crate) fn plugin(app: &mut App) {
             .0
             .enabled = false;
     }
+    app.add_systems(OnEnter(Pause(false)), |mut time: ResMut<Time<Physics>>| {
+        time.unpause();
+    });
+    app.add_systems(OnEnter(Pause(true)), |mut time: ResMut<Time<Physics>>| {
+        time.pause();
+    });
 }
