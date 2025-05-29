@@ -1,4 +1,4 @@
-use crate::game::screen::Screen;
+use crate::game::screens::Screen;
 use bevy::color::palettes::css::RED;
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;

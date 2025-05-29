@@ -1,10 +1,15 @@
 mod asset_tracking;
+mod audio;
 mod camera;
 mod demo;
 #[cfg(feature = "dev")]
 mod dev;
+mod game_system_set;
+mod menus;
+mod pause_controller;
 mod rng;
-mod screen;
+mod screens;
+mod theme;
 
 use crate::game::rng::RngPlugin;
 use bevy::app::PluginGroupBuilder;
@@ -24,12 +29,17 @@ impl Plugin for GamePlugin {
         #[cfg(feature = "dev_frame_count_log")]
         app.add_plugins(FrameCountLogPrefixPlugin);
         app.add_plugins(RngPlugin);
+        app.add_plugins(game_system_set::plugin);
         app.add_plugins(camera::plugin);
         #[cfg(feature = "dev")]
         app.add_plugins(dev::plugin);
         app.add_plugins(asset_tracking::plugin);
+        app.add_plugins(pause_controller::plugin);
         app.add_plugins(demo::plugin);
-        app.add_plugins(screen::plugin);
+        app.add_plugins(audio::plugin);
+        app.add_plugins(theme::plugin);
+        app.add_plugins(menus::plugin);
+        app.add_plugins(screens::plugin);
     }
 }
 
