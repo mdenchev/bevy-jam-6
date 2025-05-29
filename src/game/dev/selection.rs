@@ -209,9 +209,11 @@ pub fn add_highlight_observers(
             log::warn!("failed to create highlight material for {mesh_entity}");
         }
         highlight_material.base_color = Color::from(linear_rgba);
+        highlight_material.unlit = true;
 
         let mut pressed_material = highlight_material.clone();
         pressed_material.base_color = pressed_material.base_color.darker(0.1);
+        pressed_material.unlit = true;
 
         commands
             .entity(mesh_entity)
