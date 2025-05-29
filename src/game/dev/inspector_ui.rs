@@ -19,7 +19,7 @@ use bevy::reflect::TypeRegistry;
 use bevy::render::camera::Viewport;
 use bevy::window::PrimaryWindow;
 use bevy_auto_plugin::auto_plugin::*;
-use bevy_egui::{EguiContext, EguiContextSettings, EguiPlugin, EguiPostUpdateSet};
+use bevy_egui::{EguiContext, EguiContextSettings, EguiPostUpdateSet};
 #[cfg(feature = "egui_inspector")]
 use bevy_inspector_egui::{
     DefaultInspectorConfigPlugin,
@@ -39,12 +39,7 @@ use std::hash::Hash;
 #[auto_plugin(app=app)]
 pub(super) fn plugin(app: &mut App) {
     #[cfg(feature = "egui_inspector")]
-    {
-        app.add_plugins(EguiPlugin {
-            enable_multipass_for_primary_context: false,
-        });
-        app.add_plugins(DefaultInspectorConfigPlugin);
-    }
+    app.add_plugins(DefaultInspectorConfigPlugin);
     app.insert_resource(UiState::new());
     app.add_event::<DebugSelect>();
     app.add_systems(

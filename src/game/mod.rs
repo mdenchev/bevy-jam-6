@@ -18,6 +18,7 @@ use bevy::asset::AssetMetaCheck;
 use bevy::log::LogPlugin;
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
+use bevy_egui::EguiPlugin;
 #[cfg(feature = "dev_frame_count_log")]
 use bevy_frame_count_log_prefix::prelude::FrameCountLogPrefixPlugin;
 
@@ -31,6 +32,9 @@ impl Plugin for GamePlugin {
         #[cfg(feature = "dev_frame_count_log")]
         app.add_plugins(FrameCountLogPrefixPlugin);
         app.add_plugins(RngPlugin);
+        app.add_plugins(EguiPlugin {
+            enable_multipass_for_primary_context: false,
+        });
         app.add_plugins(game_system_set::plugin);
         app.add_plugins(camera::plugin);
         #[cfg(feature = "dev")]
