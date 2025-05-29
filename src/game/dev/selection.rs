@@ -5,8 +5,14 @@ use bevy::input::ButtonInput;
 use bevy::pbr::{Material, MeshMaterial3d, StandardMaterial};
 use bevy::picking::pointer::PointerInteraction;
 use bevy::prelude::*;
+use bevy::render::mesh::Indices;
 use bevy_auto_plugin::auto_plugin::*;
+use itertools::Itertools;
 use std::fmt::Debug;
+
+#[auto_register_type]
+#[derive(GizmoConfigGroup, Debug, Copy, Clone, Default, Reflect)]
+pub struct SelectedOutlineGizmos;
 
 #[auto_register_type]
 #[derive(Component, Debug, Copy, Clone, Default, Reflect)]
@@ -275,8 +281,52 @@ where
     }
 }
 
+fn outlines(
+    mut gizmo: Gizmos<SelectedOutlineGizmos>,
+    query: Query<(&GlobalTransform, &Mesh3d), With<DebugSelected>>,
+    meshes: Res<Assets<Mesh>>,
+) {
+    for (global_transform, mesh) in query {
+        let Some(mesh) = meshes.get(mesh) else {
+            continue;
+        };
+        let positions = mesh
+            .attribute(Mesh::ATTRIBUTE_POSITION)
+            .expect("mesh has no position attribute")
+            .as_float3()
+            .expect("mesh position attribute is not float3");
+
+        // Normalize into a Vec<u32>
+        let indices: Vec<u32> = match mesh.indices().expect("mesh has no indices") {
+            Indices::U16(v) => v.iter().map(|&i| i as u32).collect(),
+            Indices::U32(v) => v.clone(),
+        };
+
+        let points = indices
+            .into_iter()
+            .map(|idx| positions[idx as usize])
+            .map(|p| {
+                let global_space_point = global_transform.transform_point(Vec3::from(p));
+                let normal =
+                    (global_space_point - global_transform.translation()).normalize_or_zero();
+                global_space_point + normal * 0.1
+            })
+            .collect_vec();
+
+        for &point in points.iter() {
+            gizmo.circle(point, 1.0, Color::BLACK);
+            gizmo.circle(point, 1.5, Color::WHITE);
+        }
+
+        for (a, b) in points.into_iter().tuple_windows::<(Vec3, Vec3)>() {
+            gizmo.line_gradient(a, b, Color::WHITE, Color::BLACK);
+        }
+    }
+}
+
 #[auto_plugin(app=app)]
 pub(super) fn plugin(app: &mut App) {
+    app.init_gizmo_group::<SelectedOutlineGizmos>();
     app.add_systems(
         Update,
         (
@@ -289,4 +339,5 @@ pub(super) fn plugin(app: &mut App) {
     );
     app.add_systems(PostStartup, add_highlight_observers);
     app.add_systems(Update, add_highlight_observers);
+    app.add_systems(Update, outlines);
 }
