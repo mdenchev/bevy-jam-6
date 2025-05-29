@@ -15,6 +15,7 @@ mod theme;
 use crate::game::rng::RngPlugin;
 use bevy::app::PluginGroupBuilder;
 use bevy::asset::AssetMetaCheck;
+#[cfg(feature = "dev_frame_count_log")]
 use bevy::log::LogPlugin;
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;

@@ -1,8 +1,9 @@
 use crate::game::pause_controller::Pause;
 use avian3d::prelude::{
-    Physics, PhysicsDebugPlugin, PhysicsGizmos, PhysicsInterpolationPlugin, PhysicsPickingPlugin,
-    PhysicsPlugins, PhysicsTime,
+    Physics, PhysicsInterpolationPlugin, PhysicsPickingPlugin, PhysicsPlugins, PhysicsTime,
 };
+#[cfg(feature = "dev")]
+use avian3d::prelude::{PhysicsDebugPlugin, PhysicsGizmos};
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
 
