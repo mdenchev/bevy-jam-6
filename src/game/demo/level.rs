@@ -1,5 +1,6 @@
 //! Spawn the main level.
 
+use avian3d::prelude::Collider;
 use bevy::color;
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
@@ -41,9 +42,12 @@ pub fn spawn_level(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    let demo_ob1_mesh = Sphere::new(100.0);
+    let demo_ob1_collider = Collider::sphere(demo_ob1_mesh.radius);
     let demo_obj1 = (
         DemoObj,
-        Mesh3d(meshes.add(Sphere::new(100.0))),
+        demo_ob1_collider,
+        Mesh3d(meshes.add(demo_ob1_mesh)),
         MeshMaterial3d(materials.add(StandardMaterial {
             base_color: Color::from(color::palettes::css::RED),
             perceptual_roughness: 0.1,
@@ -52,9 +56,15 @@ pub fn spawn_level(
         Transform::from_translation(Vec3::NEG_Z * 300.0),
     );
 
+    let x_len = 500.0;
+    let y_len = 5.0;
+    let z_len = 500.0;
+    let demo_ob2_mesh = Cuboid::new(x_len, y_len, z_len);
+    let demo_ob2_collider = Collider::cuboid(x_len, y_len, z_len);
     let demo_obj2 = (
         DemoObj,
-        Mesh3d(meshes.add(Cuboid::new(500.0, 5.0, 500.0))),
+        demo_ob2_collider,
+        Mesh3d(meshes.add(demo_ob2_mesh)),
         MeshMaterial3d(materials.add(StandardMaterial {
             base_color: Color::WHITE,
             perceptual_roughness: 0.25,
@@ -63,8 +73,11 @@ pub fn spawn_level(
         Transform::from_translation(Vec3::NEG_Z * 300.0 + Vec3::Y * -100.0),
     );
 
+    let light_mesh = Sphere::new(5.0);
+    let light_collider = Collider::sphere(light_mesh.radius);
     let light = (
         LightMesh,
+        light_collider,
         PointLight {
             intensity: 10000000.0,
             range: 1000.0,
@@ -74,7 +87,7 @@ pub fn spawn_level(
         },
         Transform::from_translation(Vec3::new(50.0, 50.0, -180.0)),
         children![(
-            Mesh3d(meshes.add(Sphere::new(5.0))),
+            Mesh3d(meshes.add(light_mesh)),
             MeshMaterial3d(materials.add(StandardMaterial {
                 emissive: Color::WHITE.to_linear(),
                 unlit: true,
