@@ -33,7 +33,13 @@ pub struct DemoObj;
 #[auto_name]
 #[derive(Component, Debug, Default, Copy, Clone, Reflect)]
 #[reflect(Component)]
-pub struct LightMesh;
+pub struct DemoFloor;
+
+#[auto_register_type]
+#[auto_name]
+#[derive(Component, Debug, Default, Copy, Clone, Reflect)]
+#[reflect(Component)]
+pub struct DemoLight;
 
 /// A system that spawns the main level.
 pub fn spawn_level(
@@ -42,34 +48,34 @@ pub fn spawn_level(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let demo_ob1_mesh = Sphere::new(100.0);
-    let demo_ob1_collider = Collider::sphere(demo_ob1_mesh.radius);
-    let demo_ob1_transform = Transform::from_translation(Vec3::NEG_Z * 300.0);
-    let demo_obj1 = commands
+    let demo_obj_mesh = Sphere::new(100.0);
+    let demo_obj_collider = Collider::sphere(demo_obj_mesh.radius);
+    let demo_obj_transform = Transform::from_translation(Vec3::NEG_Z * 300.0);
+    let demo_obj = commands
         .spawn((
             DemoObj,
             RigidBody::Static,
-            demo_ob1_collider,
-            Mesh3d(meshes.add(demo_ob1_mesh)),
+            demo_obj_collider,
+            Mesh3d(meshes.add(demo_obj_mesh)),
             MeshMaterial3d(materials.add(StandardMaterial {
                 base_color: Color::from(color::palettes::css::RED),
                 perceptual_roughness: 0.1,
                 ..Default::default()
             })),
-            demo_ob1_transform,
+            demo_obj_transform,
         ))
         .id();
 
     let x_len = 500.0;
     let y_len = 5.0;
     let z_len = 500.0;
-    let demo_ob2_mesh = Cuboid::new(x_len, y_len, z_len);
-    let demo_ob2_collider = Collider::cuboid(x_len, y_len, z_len);
-    let demo_obj2 = (
-        DemoObj,
+    let demo_floor_mesh = Cuboid::new(x_len, y_len, z_len);
+    let demo_floor_collider = Collider::cuboid(x_len, y_len, z_len);
+    let demo_floor = (
+        DemoFloor,
         RigidBody::Static,
-        demo_ob2_collider,
-        Mesh3d(meshes.add(demo_ob2_mesh)),
+        demo_floor_collider,
+        Mesh3d(meshes.add(demo_floor_mesh)),
         MeshMaterial3d(materials.add(StandardMaterial {
             base_color: Color::WHITE,
             perceptual_roughness: 0.25,
@@ -78,16 +84,16 @@ pub fn spawn_level(
         Transform::from_translation(Vec3::NEG_Z * 300.0 + Vec3::Y * -100.0),
     );
 
-    let light_mesh = Sphere::new(5.0);
-    let light_collider = Collider::sphere(light_mesh.radius);
-    let light_transform = Transform::from_translation(Vec3::new(50.0, 50.0, -180.0));
-    let light = commands
+    let demo_light_mesh = Sphere::new(5.0);
+    let demo_light_collider = Collider::sphere(demo_light_mesh.radius);
+    let demo_light_transform = Transform::from_translation(Vec3::new(50.0, 50.0, -180.0));
+    let demo_light = commands
         .spawn((
-            LightMesh,
+            DemoLight,
             RigidBody::Dynamic,
             ExternalImpulse::new(Vec3::new(6000.0, 150.0, 3000.0)).with_persistence(true),
             GravityScale(0.0),
-            light_collider,
+            demo_light_collider,
             PointLight {
                 intensity: 10000000.0,
                 range: 1000.0,
@@ -95,9 +101,9 @@ pub fn spawn_level(
                 shadows_enabled: true,
                 ..Default::default()
             },
-            light_transform,
+            demo_light_transform,
             children![(
-                Mesh3d(meshes.add(light_mesh)),
+                Mesh3d(meshes.add(demo_light_mesh)),
                 MeshMaterial3d(materials.add(StandardMaterial {
                     emissive: Color::WHITE.to_linear(),
                     unlit: true,
@@ -107,7 +113,8 @@ pub fn spawn_level(
         ))
         .id();
 
-    let distance_min_max = (demo_ob1_transform.translation - light_transform.translation).length();
+    let distance_min_max =
+        (demo_obj_transform.translation - demo_light_transform.translation).length();
 
     commands
         .spawn((
@@ -120,13 +127,14 @@ pub fn spawn_level(
                     Name::new("Gameplay Music"),
                     music(level_assets.music.clone())
                 ),
-                demo_obj2
+                demo_floor
             ],
         ))
-        .add_child(light)
-        .add_child(demo_obj1)
+        .add_child(demo_light)
+        .add_child(demo_obj)
         .with_child(
-            DistanceJoint::new(demo_obj1, light).with_limits(distance_min_max, distance_min_max),
+            DistanceJoint::new(demo_obj, demo_light)
+                .with_limits(distance_min_max, distance_min_max),
         );
 }
 
