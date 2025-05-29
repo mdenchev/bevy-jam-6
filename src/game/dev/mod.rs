@@ -9,8 +9,11 @@ use bevy_auto_plugin::auto_plugin::*;
 #[auto_plugin(app=app)]
 pub(crate) fn plugin(app: &mut App) {
     app.add_plugins(fps::plugin);
-    app.add_plugins(inspector_ui::plugin);
-    app.add_plugins(selection::plugin);
+    #[cfg(feature = "inspector_ui")]
+    {
+        app.add_plugins(inspector_ui::plugin);
+        app.add_plugins(selection::plugin);
+    }
     app.add_systems(
         Update,
         toggle_debug_ui.run_if(input_just_pressed(KeyCode::Backquote)),

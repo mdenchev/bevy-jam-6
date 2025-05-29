@@ -86,8 +86,7 @@ dev = [
     "bevy/bevy_ui_debug",
     # Improve error messages coming from Bevy
     "bevy/track_location",
-    "egui_inspector",
-    "egui_dock",
+    "inspector_ui"
 ]
 dev_native = [
     "dev",
@@ -96,6 +95,10 @@ dev_native = [
     # Enable embedded asset hot reloading for native dev builds.
     "bevy/embedded_watcher",
     "dev_frame_count_log"
+]
+inspector_ui = [
+    "egui_inspector",
+    "egui_dock"
 ]
 egui_inspector = ["bevy-inspector-egui"]
 dev_frame_count_log = [
