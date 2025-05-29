@@ -905,6 +905,7 @@ dependencies = [
  "bevy_auto_plugin",
  "bevy_egui",
  "bevy_frame_count_log_prefix",
+ "bevy_panorbit_camera",
  "bevy_prng",
  "bevy_rand",
  "egui_dock",
@@ -1190,6 +1191,16 @@ version = "0.16.0"
 source = "git+https://github.com/StrikeForceZero/bevy?branch=main-v0.16#bbe0bdfea928d95ee870323dc6b0625b91047a28"
 dependencies = [
  "glam",
+]
+
+[[package]]
+name = "bevy_panorbit_camera"
+version = "0.26.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ca6e15e297754d0bcb7665620c390c4f05665d4ac4ac91b4b5d3c66b9fe1f0e6"
+dependencies = [
+ "bevy",
+ "bevy_egui",
 ]
 
 [[package]]
