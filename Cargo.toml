@@ -19,6 +19,7 @@ bevy_egui = { version = "0.34", features = ["serde"] }
 bevy-inspector-egui = { git = "https://github.com/jakobhellermann/bevy-inspector-egui", rev = "a99c8fbfff95dd92134f44aa705573bc5b0d3f10", features = ["highlight_changes"], optional = true }
 egui_dock = { version = "0.16", optional = true }
 smart-default = { version = "0.7" }
+itertools = { version = "0.14" }
 # Compile low-severity logs out of native builds for performance.
 log = { version = "0.4", features = [
     "max_level_debug",

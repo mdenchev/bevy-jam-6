@@ -908,6 +908,7 @@ dependencies = [
  "bevy_prng",
  "bevy_rand",
  "egui_dock",
+ "itertools 0.14.0",
  "log",
  "rand_core 0.9.3",
  "smart-default",
