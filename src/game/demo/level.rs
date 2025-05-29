@@ -5,6 +5,7 @@ use bevy::color;
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
 
+use crate::game::camera::CameraTarget;
 use crate::game::{asset_tracking::LoadResource, audio::music, screens::Screen};
 
 #[derive(Resource, Asset, Clone, Reflect)]
@@ -54,6 +55,7 @@ pub fn spawn_level(
     let demo_obj = commands
         .spawn((
             DemoObj,
+            CameraTarget,
             RigidBody::Static,
             demo_obj_collider,
             Mesh3d(meshes.add(demo_obj_mesh)),
