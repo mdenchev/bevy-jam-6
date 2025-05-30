@@ -2,6 +2,8 @@ use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
 use bevy_hanabi::prelude::*;
 
+#[auto_register_type]
+#[auto_init_resource]
 #[derive(Resource, Asset, Clone, Reflect)]
 #[reflect(Resource)]
 pub struct FxAssets {
@@ -69,6 +71,4 @@ impl FromWorld for FxAssets {
 }
 
 #[auto_plugin(app=app)]
-pub(super) fn plugin(app: &mut App) {
-    app.init_resource::<FxAssets>();
-}
+pub(super) fn plugin(app: &mut App) {}

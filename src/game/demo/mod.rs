@@ -6,5 +6,6 @@ use bevy_auto_plugin::auto_plugin::*;
 
 #[auto_plugin(app=app)]
 pub(crate) fn plugin(app: &mut App) {
-    app.add_plugins((fx::plugin, level::plugin));
+    app.add_plugins(fx::plugin);
+    app.add_plugins(level::plugin);
 }
