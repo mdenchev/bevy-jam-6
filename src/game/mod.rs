@@ -29,15 +29,20 @@ pub struct GamePlugin;
 impl Plugin for GamePlugin {
     #[auto_plugin(app=app)]
     fn build(&self, app: &mut App) {
+        // Bevy
         app.add_plugins(default_plugins());
-        app.add_plugins(HanabiPlugin);
         app.add_plugins(MeshPickingPlugin);
+
+        // External
         #[cfg(feature = "dev_frame_count_log")]
         app.add_plugins(FrameCountLogPrefixPlugin);
-        app.add_plugins(RngPlugin);
         app.add_plugins(EguiPlugin {
             enable_multipass_for_primary_context: false,
         });
+        app.add_plugins(HanabiPlugin);
+
+        // Internal
+        app.add_plugins(RngPlugin);
         app.add_plugins(game_system_set::plugin);
         app.add_plugins(camera::plugin);
         #[cfg(feature = "dev")]
