@@ -4,12 +4,15 @@ use bevy_auto_plugin::auto_plugin::*;
 use bevy_panorbit_camera::PanOrbitCamera;
 use bevy_panorbit_camera::PanOrbitCameraPlugin;
 
+#[auto_register_type]
+#[auto_name]
 #[derive(Component, Debug, Default, Clone, Copy, Reflect)]
 #[reflect(Component)]
 #[require(PanOrbitCamera)]
 #[require(ShadowFilteringMethod::Hardware2x2)]
 pub struct MainCamera;
 
+#[auto_register_type]
 #[derive(Component, Debug, Default, Clone, Copy, Reflect)]
 #[reflect(Component)]
 #[require(Transform)]
