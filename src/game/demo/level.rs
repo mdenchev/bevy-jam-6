@@ -4,9 +4,12 @@ use avian3d::prelude::{Collider, DistanceJoint, ExternalImpulse, GravityScale, J
 use bevy::color;
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
+use bevy_hanabi::ParticleEffect;
 
 use crate::game::camera::CameraTarget;
 use crate::game::{asset_tracking::LoadResource, audio::music, screens::Screen};
+
+use super::fx::FxAssets;
 
 #[derive(Resource, Asset, Clone, Reflect)]
 #[reflect(Resource)]
@@ -48,7 +51,9 @@ pub fn spawn_level(
     level_assets: Res<LevelAssets>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    fx: Res<FxAssets>,
 ) {
+    // Sphere
     let demo_obj_mesh = Sphere::new(100.0);
     let demo_obj_collider = Collider::sphere(demo_obj_mesh.radius);
     let demo_obj_transform = Transform::from_translation(Vec3::NEG_Z * 300.0);
@@ -68,6 +73,7 @@ pub fn spawn_level(
         ))
         .id();
 
+    // Floor
     let x_len = 500.0;
     let y_len = 5.0;
     let z_len = 500.0;
@@ -86,6 +92,7 @@ pub fn spawn_level(
         Transform::from_translation(Vec3::NEG_Z * 300.0 + Vec3::Y * -100.0),
     );
 
+    // Light + Light objects
     let demo_light_mesh = Sphere::new(5.0);
     let demo_light_collider = Collider::sphere(demo_light_mesh.radius);
     let demo_light_transform = Transform::from_translation(Vec3::new(50.0, 50.0, -180.0));
@@ -111,6 +118,7 @@ pub fn spawn_level(
                     unlit: true,
                     ..Default::default()
                 })),
+                ParticleEffect::new(fx.light.clone()),
             )],
         ))
         .id();

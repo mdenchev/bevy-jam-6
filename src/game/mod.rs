@@ -22,6 +22,7 @@ use bevy_auto_plugin::auto_plugin::*;
 use bevy_egui::EguiPlugin;
 #[cfg(feature = "dev_frame_count_log")]
 use bevy_frame_count_log_prefix::prelude::FrameCountLogPrefixPlugin;
+use bevy_hanabi::HanabiPlugin;
 
 pub struct GamePlugin;
 
@@ -29,6 +30,7 @@ impl Plugin for GamePlugin {
     #[auto_plugin(app=app)]
     fn build(&self, app: &mut App) {
         app.add_plugins(default_plugins());
+        app.add_plugins(HanabiPlugin);
         app.add_plugins(MeshPickingPlugin);
         #[cfg(feature = "dev_frame_count_log")]
         app.add_plugins(FrameCountLogPrefixPlugin);
