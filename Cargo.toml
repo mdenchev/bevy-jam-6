@@ -10,28 +10,16 @@ edition = "2024"
 avian3d = { version = "0.3" }
 bevy = { version = "0.16", features = ["glam_assert", "serialize"] }
 bevy_auto_plugin = { version = "0.2.1", features = ["nightly_pre_2025_04_16"] }
-bevy_frame_count_log_prefix = { git = "https://github.com/StrikeForceZero/bevy_frame_count_log_prefix", branch = "main", features = [
-    "fixed_update",
-], optional = true }
-bevy_rand = { version = "0.11", features = [
-    "bevy_reflect",
-    "serialize",
-    "wyrand",
-] }
-bevy_prng = { version = "0.11", features = [
-    "bevy_reflect",
-    "serialize",
-    "wyrand",
-] }
+bevy_frame_count_log_prefix = { git = "https://github.com/StrikeForceZero/bevy_frame_count_log_prefix", branch = "main", features = ["fixed_update"], optional = true }
+bevy_rand = { version = "0.11", features = ["bevy_reflect", "serialize", "wyrand"] }
+bevy_prng = { version = "0.11", features = ["bevy_reflect", "serialize", "wyrand"] }
 rand_core = { version = "0.9", features = ["serde"] }
 bevy_egui = { version = "0.34", features = ["serde"] }
 bevy_panorbit_camera = { version = "0.26", features = ["bevy_egui"] }
 # bevy_hanabi hasn't published 1.16 yet (https://discord.com/channels/691052431525675048/1036006050526142514/1370844642647478373)
 bevy_hanabi = { git = "https://github.com/djeedai/bevy_hanabi", branch = "main" }
 # unreleased version with support for immutable components
-bevy-inspector-egui = { git = "https://github.com/jakobhellermann/bevy-inspector-egui", rev = "a99c8fbfff95dd92134f44aa705573bc5b0d3f10", features = [
-    "highlight_changes",
-], optional = true }
+bevy-inspector-egui = { git = "https://github.com/jakobhellermann/bevy-inspector-egui", rev = "a99c8fbfff95dd92134f44aa705573bc5b0d3f10", features = ["highlight_changes"], optional = true }
 egui_dock = { version = "0.16", optional = true }
 smart-default = { version = "0.7" }
 itertools = { version = "0.14" }
@@ -92,7 +80,9 @@ bevy_winit = { git = "https://github.com/StrikeForceZero/bevy", branch = "main-v
 
 [features]
 # Default to a native dev build.
-default = ["dev_native"]
+default = [
+    "dev_native",
+]
 dev = [
     # Improve compile times for dev builds by linking Bevy as a dynamic library.
     "bevy/dynamic_linking",
@@ -110,10 +100,19 @@ dev_native = [
     "bevy/embedded_watcher",
     "dev_frame_count_log",
 ]
-inspector_ui = ["egui_inspector", "egui_dock"]
-egui_inspector = ["bevy-inspector-egui"]
-dev_frame_count_log = ["bevy_frame_count_log_prefix"]
-wasm = ["bevy_rand/wasm_js"]
+inspector_ui = [
+    "egui_inspector",
+    "egui_dock",
+]
+egui_inspector = [
+    "bevy-inspector-egui",
+]
+dev_frame_count_log = [
+    "bevy_frame_count_log_prefix",
+]
+wasm = [
+    "bevy_rand/wasm_js",
+]
 
 [package.metadata.bevy_cli.release]
 # Disable dev features for release builds.
