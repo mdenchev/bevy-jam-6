@@ -19,7 +19,7 @@ bevy_panorbit_camera = { version = "0.26", features = ["bevy_egui"] }
 # bevy_hanabi hasn't published 1.16 yet (https://discord.com/channels/691052431525675048/1036006050526142514/1370844642647478373)
 bevy_hanabi = { git = "https://github.com/djeedai/bevy_hanabi", branch = "main" }
 # unreleased version with support for immutable components
-bevy-inspector-egui = { git = "https://github.com/jakobhellermann/bevy-inspector-egui", rev = "a99c8fbfff95dd92134f44aa705573bc5b0d3f10", features = ["highlight_changes"], optional = true }
+bevy-inspector-egui = { git = "https://github.com/StrikeForceZero/bevy-inspector-egui", branch = "dev/edit_immutable_components", features = ["highlight_changes"], optional = true }
 egui_dock = { version = "0.16", optional = true }
 smart-default = { version = "0.7" }
 itertools = { version = "0.14" }
