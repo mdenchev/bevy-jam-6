@@ -1,3 +1,5 @@
+#![allow(unreachable_code)]
+
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin_module::auto_register_type;
 
