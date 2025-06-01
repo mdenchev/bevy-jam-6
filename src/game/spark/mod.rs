@@ -1,5 +1,7 @@
 #![allow(unreachable_code)]
 
+mod config;
+
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
 
@@ -11,29 +13,7 @@ use super::{
     snapshot::Snapshot,
 };
 
-#[auto_register_type]
-#[derive(Resource, Reflect)]
-pub struct SparkConfig {
-    pub max_charge: f32,
-    pub start_charge: f32,
-    pub decay_per_second: f32,
-    pub cost_per_m: f32,
-    pub damage_dealt_per_second: f32,
-    pub max_distance_jump_m: f32,
-}
-
-impl Default for SparkConfig {
-    fn default() -> Self {
-        Self {
-            max_charge: 100.0,
-            start_charge: 50.0,
-            decay_per_second: 5.0,
-            damage_dealt_per_second: 20.0,
-            cost_per_m: 1.0,
-            max_distance_jump_m: 50.0,
-        }
-    }
-}
+use config::*;
 
 #[auto_name]
 #[auto_register_type]
@@ -63,7 +43,7 @@ pub struct ZappedBy(Vec<Entity>);
 
 #[auto_plugin(app=app)]
 pub fn plugin(app: &mut App) {
-    app.init_resource::<SparkConfig>();
+    app.add_plugins(config::plugin);
 
     app.add_observer(SparkTarget::handle_inserted)
         .add_observer(Zapping::handle_inserted)
