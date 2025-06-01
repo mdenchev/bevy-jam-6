@@ -47,7 +47,11 @@ fn on_enemy_added(
     };
     let gltf = gltfs
         .get(&gltf_h)
+<<<<<<< HEAD
         .unwrap_or_else(|| panic!("Missing gltf asset for {:?}", enemy));
+=======
+        .expect(&format!("Missing gltf asset for {:?}", enemy));
+>>>>>>> 0a11587 (Add skeleton spawning & component for moving to target ent)
     commands
         .entity(trigger.target())
         .insert(SceneRoot(gltf.scenes[0].clone()));

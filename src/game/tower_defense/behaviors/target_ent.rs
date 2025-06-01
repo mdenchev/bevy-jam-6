@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+use std::cmp;
+
+>>>>>>> 0a11587 (Add skeleton spawning & component for moving to target ent)
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
 
