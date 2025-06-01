@@ -5,6 +5,7 @@ mod demo;
 #[cfg(feature = "dev")]
 mod dev;
 mod game_system_set;
+mod health;
 mod menus;
 mod pause_controller;
 mod physics;
