@@ -1,6 +1,10 @@
+#[macro_use]
+mod enforce_exists;
+
 mod asset_tracking;
 mod audio;
 mod camera;
+mod constants;
 mod demo;
 #[cfg(feature = "dev")]
 mod dev;
@@ -11,6 +15,8 @@ mod pause_controller;
 mod physics;
 mod rng;
 mod screens;
+mod snapshot;
+mod spark;
 mod theme;
 
 use crate::game::rng::RngPlugin;
@@ -57,6 +63,7 @@ impl Plugin for GamePlugin {
         app.add_plugins(menus::plugin);
         app.add_plugins(screens::plugin);
         app.add_plugins(health::plugin);
+        app.add_plugins(spark::plugin);
     }
 }
 
