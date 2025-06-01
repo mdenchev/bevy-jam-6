@@ -8,6 +8,7 @@ use bevy_auto_plugin::auto_plugin::*;
 
 use super::behaviors::target_ent::TargetEnt;
 use super::enemy::Enemy;
+use super::lightning_ball::LightningBall;
 
 #[auto_plugin(app=app)]
 pub(crate) fn plugin(app: &mut App) {}
@@ -71,7 +72,7 @@ pub fn spawn_level(
         Transform::from_xyz(100.0, 20.0, 100.0).with_scale(Vec3::splat(5.0)),
         TargetEnt {
             target_ent: tower_ent,
-            within_distance: 10.0,
+            within_distance: 20.0,
         },
     ));
 }
