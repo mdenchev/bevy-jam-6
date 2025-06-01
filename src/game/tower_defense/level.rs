@@ -69,7 +69,7 @@ pub fn spawn_level(
     commands.entity(level_ent).with_child((
         Name::new("Skele"),
         Enemy::BaseSkele,
-        Transform::from_xyz(100.0, 20.0, 100.0).with_scale(Vec3::splat(5.0)),
+        Transform::from_xyz(100.0, 10.0, 100.0).with_scale(Vec3::splat(15.0)),
         TargetEnt {
             target_ent: tower_ent,
             within_distance: 20.0,
