@@ -11,6 +11,7 @@ mod physics;
 mod rng;
 mod screens;
 mod theme;
+mod tower_defense;
 
 use crate::game::rng::RngPlugin;
 use bevy::app::PluginGroupBuilder;
@@ -51,6 +52,7 @@ impl Plugin for GamePlugin {
         app.add_plugins(pause_controller::plugin);
         app.add_plugins(physics::plugin);
         app.add_plugins(demo::plugin);
+        app.add_plugins(tower_defense::plugin);
         app.add_plugins(audio::plugin);
         app.add_plugins(theme::plugin);
         app.add_plugins(menus::plugin);
