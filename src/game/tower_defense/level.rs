@@ -8,16 +8,10 @@ use bevy_auto_plugin::auto_plugin::*;
 
 use super::behaviors::target_ent::TargetEnt;
 use super::enemy::Enemy;
-<<<<<<< HEAD
 use super::lightning_ball::LightningBall;
 
 #[auto_plugin(app=_app)]
 pub(crate) fn plugin(_app: &mut App) {}
-=======
-
-#[auto_plugin(app=app)]
-pub(crate) fn plugin(app: &mut App) {}
->>>>>>> 0a11587 (Add skeleton spawning & component for moving to target ent)
 
 pub fn spawn_level(
     mut commands: Commands,
