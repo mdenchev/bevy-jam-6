@@ -5,6 +5,7 @@ use smart_default::SmartDefault;
 #[auto_register_type]
 #[auto_init_resource]
 #[derive(Resource, Reflect, SmartDefault)]
+#[reflect(Resource)]
 pub struct SparkConfig {
     #[default(100.0)]
     pub max_charge: f32,
