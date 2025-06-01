@@ -47,7 +47,7 @@ fn on_enemy_added(
     };
     let gltf = gltfs
         .get(&gltf_h)
-        .expect(&format!("Missing gltf asset for {:?}", enemy));
+        .unwrap_or_else(|| panic!("Missing gltf asset for {:?}", enemy));
     commands
         .entity(trigger.target())
         .insert(SceneRoot(gltf.scenes[0].clone()));

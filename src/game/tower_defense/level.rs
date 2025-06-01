@@ -10,8 +10,8 @@ use super::behaviors::target_ent::TargetEnt;
 use super::enemy::Enemy;
 use super::lightning_ball::LightningBall;
 
-#[auto_plugin(app=app)]
-pub(crate) fn plugin(app: &mut App) {}
+#[auto_plugin(app=_app)]
+pub(crate) fn plugin(_app: &mut App) {}
 
 pub fn spawn_level(
     mut commands: Commands,
