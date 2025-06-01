@@ -116,7 +116,7 @@ impl Zapping {
         let (mut tf, gl_tf) = sparks.get_mut(tr.target()).expect("require");
         tf.translation = gl_tf.translation();
 
-        commands.entity(tr.target()).remove::<ChildOf>();
+        commands.entity(tr.target()).try_remove::<ChildOf>();
     }
 }
 
