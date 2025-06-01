@@ -43,7 +43,7 @@ fn handle_adjust_hp(
         let Ok(mut health) = health_query.get_mut(*target) else {
             continue;
         };
-        health.0 -= amount;
+        health.0 += amount;
 
         if health.0 <= 0.0 {
             commands.entity(*target).insert(Dead);

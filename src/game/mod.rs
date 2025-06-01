@@ -6,6 +6,7 @@ mod audio;
 mod camera;
 mod constants;
 mod demo;
+mod despawn;
 #[cfg(feature = "dev")]
 mod dev;
 mod game_system_set;
@@ -64,6 +65,7 @@ impl Plugin for GamePlugin {
         app.add_plugins(screens::plugin);
         app.add_plugins(health::plugin);
         app.add_plugins(spark::plugin);
+        app.add_plugins(despawn::plugin::<PreUpdate>);
     }
 }
 

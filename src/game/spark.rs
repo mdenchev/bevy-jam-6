@@ -3,7 +3,7 @@
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
 
-use crate::game::{constants::UNITS_PER_METER, health::Dead};
+use crate::game::{constants::METERS_PER_UNIT, despawn::DespawnDelayed, health::Dead};
 
 use super::{
     health::{AdjustHp, Health, MaxHealth},
@@ -29,7 +29,7 @@ impl Default for SparkConfig {
             start_charge: 50.0,
             decay_per_second: 5.0,
             damage_dealt_per_second: 20.0,
-            cost_per_m: 10.0,
+            cost_per_m: 1.0,
             max_distance_jump_m: 50.0,
         }
     }
@@ -43,7 +43,7 @@ pub struct Spark;
 
 #[auto_register_type]
 #[derive(Component, Reflect)]
-#[require(Transform)]
+#[require(Transform, Pickable)]
 pub struct SparkTarget;
 
 /// Spark -> Zapping -> SparkTarget
@@ -59,7 +59,7 @@ pub struct Zapping(pub Entity);
 #[derive(Component, Reflect)]
 #[require(SparkTarget = enforce_exists!(SparkTarget))]
 #[relationship_target(relationship=Zapping)]
-pub struct ZappedBy(Entity);
+pub struct ZappedBy(Vec<Entity>);
 
 #[auto_plugin(app=app)]
 pub fn plugin(app: &mut App) {
@@ -67,17 +67,20 @@ pub fn plugin(app: &mut App) {
 
     app.add_observer(SparkTarget::handle_inserted)
         .add_observer(Zapping::handle_inserted)
+        .add_observer(Zapping::handle_removed)
         .add_observer(ZappedBy::handle_inserted)
         .add_observer(Spark::handle_inserted);
 
     app.add_systems(
         Update,
-        (
-            spark::decay_health,
-            spark::deal_dot,
-            spark::apply_distance_cost,
-        )
-            .in_set(PausableSystems),
+        (spark::decay_health, spark::deal_dot).in_set(PausableSystems),
+    );
+
+    app.add_systems(
+        PostUpdate,
+        spark::apply_distance_cost
+            .in_set(PausableSystems)
+            .after(TransformSystem::TransformPropagate),
     );
 }
 
@@ -96,13 +99,15 @@ impl SparkTarget {
                 .translation();
 
             for (spark, tf_spark) in sparks {
-                let dist = (tf_spark.translation() - tl_target).length() * UNITS_PER_METER;
-
+                let dist = (tf_spark.translation() - tl_target).length() * METERS_PER_UNIT;
                 if dist > cfg.max_distance_jump_m {
                     continue;
                 }
 
-                commands.entity(spark).insert(Zapping(tr.target()));
+                commands
+                    .entity(spark)
+                    .remove::<Zapping>()
+                    .insert(Zapping(tr.target()));
             }
         }
 
@@ -122,6 +127,17 @@ impl Zapping {
             .entity(tr.target())
             .insert((ChildOf(comp.0), Transform::default())); // TODO better relative positioning
     }
+
+    fn handle_removed(
+        tr: Trigger<OnRemove, Self>,
+        mut sparks: Query<(&mut Transform, &GlobalTransform), With<Spark>>,
+        mut commands: Commands,
+    ) {
+        let (mut tf, gl_tf) = sparks.get_mut(tr.target()).expect("require");
+        tf.translation = gl_tf.translation();
+
+        commands.entity(tr.target()).remove::<ChildOf>();
+    }
 }
 
 impl ZappedBy {
@@ -137,7 +153,7 @@ impl ZappedBy {
 impl Spark {
     fn handle_inserted(tr: Trigger<OnInsert, Self>, mut commands: Commands, cfg: Res<SparkConfig>) {
         fn handle_death(tr: Trigger<OnInsert, Dead>, mut commands: Commands) {
-            commands.entity(tr.target()).despawn();
+            commands.entity(tr.target()).trigger(DespawnDelayed);
         }
 
         commands
@@ -158,6 +174,7 @@ mod spark {
         cfg: Res<SparkConfig>,
     ) {
         let damage_amount = time.delta_secs() * cfg.decay_per_second;
+
         adjust_hp_event.write_batch(
             sparks
                 .iter()
@@ -193,7 +210,7 @@ mod spark {
                 continue;
             };
 
-            let dist = (gt_new.translation() - gt_old.translation()).length() * UNITS_PER_METER;
+            let dist = (gt_new.translation() - gt_old.translation()).length() * METERS_PER_UNIT;
 
             adjust_hp_event.write(AdjustHp::new(spark, -dist * cfg.cost_per_m));
         }

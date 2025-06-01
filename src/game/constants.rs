@@ -1,1 +1,1 @@
-pub const UNITS_PER_METER: f32 = 1.0;
+pub const METERS_PER_UNIT: f32 = 0.1;
