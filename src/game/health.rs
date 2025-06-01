@@ -27,14 +27,9 @@ pub struct Dead;
 
 // Plugin
 
-#[derive(Default)]
-pub struct HealthPlugin;
-
-impl Plugin for HealthPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Update, handle_adjust_hp);
-        app.add_event::<AdjustHp>();
-    }
+pub fn plugin(app: &mut App) {
+    app.add_systems(Update, handle_adjust_hp);
+    app.add_event::<AdjustHp>();
 }
 
 // Internals

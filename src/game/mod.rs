@@ -56,6 +56,7 @@ impl Plugin for GamePlugin {
         app.add_plugins(theme::plugin);
         app.add_plugins(menus::plugin);
         app.add_plugins(screens::plugin);
+        app.add_plugins(health::plugin);
     }
 }
 
