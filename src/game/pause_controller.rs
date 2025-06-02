@@ -15,4 +15,5 @@ pub(super) struct PausableSystems;
 #[auto_plugin(app=app)]
 pub(crate) fn plugin(app: &mut App) {
     app.configure_sets(Update, PausableSystems.run_if(in_state(Pause(false))));
+    app.configure_sets(PostUpdate, PausableSystems.run_if(in_state(Pause(false))));
 }

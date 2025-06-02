@@ -1,7 +1,7 @@
 #![allow(unreachable_code)]
 
 use bevy::prelude::*;
-use bevy_auto_plugin::auto_plugin_module::auto_register_type;
+use bevy_auto_plugin::auto_plugin::*;
 
 #[auto_register_type]
 #[derive(Component, Reflect, Debug)]
@@ -11,7 +11,7 @@ pub struct Health(pub f32);
 #[auto_register_type]
 #[derive(Component, Reflect, Debug)]
 #[reflect(Component)]
-#[require(Health = panic!("MaxHealth requires Health") as Health)]
+#[require(Health = enforce_exists!(Health))]
 pub struct MaxHealth(pub f32);
 
 #[derive(Event, Debug)]
@@ -26,7 +26,7 @@ pub struct AdjustHp {
 pub struct Dead;
 
 // Plugin
-
+#[auto_plugin(app=app)]
 pub fn plugin(app: &mut App) {
     app.add_systems(Update, handle_adjust_hp);
     app.add_event::<AdjustHp>();
@@ -43,10 +43,16 @@ fn handle_adjust_hp(
         let Ok(mut health) = health_query.get_mut(*target) else {
             continue;
         };
-        health.0 -= amount;
+        health.0 += amount;
 
         if health.0 <= 0.0 {
             commands.entity(*target).insert(Dead);
         }
+    }
+}
+
+impl AdjustHp {
+    pub fn new(target: Entity, amount: f32) -> Self {
+        Self { target, amount }
     }
 }
