@@ -1,7 +1,11 @@
+use std::f32::consts::PI;
+use std::time::Duration;
+
 use crate::game::behaviors::target_ent::TargetEnt;
 use crate::game::camera::CameraTarget;
 use crate::game::effects::lightning_ball::{LightningBall, LightningBallConduit};
 use crate::game::prefabs::enemy::Enemy;
+use crate::game::prefabs::spawner::Spawner;
 use crate::game::prefabs::tower::Tower;
 use crate::game::prefabs::wizard::Wizard;
 use crate::game::screens::Screen;
@@ -9,6 +13,11 @@ use avian3d::prelude::Collider;
 use bevy::color::palettes::css::GREEN;
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
+
+#[auto_register_type]
+#[derive(Component, Debug, Copy, Clone, Reflect)]
+#[reflect(Component)]
+pub struct LevelRoot;
 
 #[auto_plugin(app=_app)]
 pub fn plugin(_app: &mut App) {}
@@ -21,6 +30,7 @@ pub fn spawn_level(
     let level_ent = commands
         .spawn((
             Name::new("Level"),
+            LevelRoot,
             StateScoped(Screen::Gameplay),
             Transform::default(),
             Visibility::default(),
@@ -62,9 +72,21 @@ pub fn spawn_level(
         ))
         .id();
 
+    // Spawners
+    for (x, y) in equidistant_points_on_circle(300., 5) {
+        commands.entity(level_ent).with_child((
+            Spawner {
+                spawns: Enemy::BaseSkele,
+                spawn_duration: Duration::from_secs_f32(4.0),
+                time_to_next_spawn: Duration::from_secs_f32(0.0),
+                spawn_left: 4,
+            },
+            Transform::from_xyz(x, 10.0, y),
+        ));
+    }
+    // Prespawned skele
     commands.entity(level_ent).with_child((
         Name::new("Skele"),
-        LightningBallConduit,
         Enemy::BaseSkele,
         Transform::from_xyz(100.0, 10.0, 100.0).with_scale(Vec3::splat(15.0)),
         TargetEnt {
@@ -72,4 +94,25 @@ pub fn spawn_level(
             within_distance: 20.0,
         },
     ));
+}
+
+/// Generate points along a circle.
+// TODO move to a more appropriate place
+pub fn equidistant_points_on_circle(radius: f32, num_points: usize) -> Vec<(f32, f32)> {
+    if radius < 0.0 {
+        panic!("Radius cannot be negative.");
+    }
+
+    if num_points == 0 {
+        return Vec::new();
+    }
+
+    (0..num_points)
+        .map(|i| {
+            let angle = (i as f32) * (2.0 * PI) / (num_points as f32);
+            let x = radius * angle.cos();
+            let y = radius * angle.sin();
+            (x, y)
+        })
+        .collect()
 }
