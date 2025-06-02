@@ -71,7 +71,7 @@ pub fn spawn_level(
             ),],
         ))
         .id();
-    
+
     // Spawners
     for (x, y) in equidistant_points_on_circle(300., 5) {
         commands.entity(level_ent).with_child((

@@ -1,6 +1,5 @@
 use std::time::Duration;
 
-use crate::game::asset_tracking::LoadResource;
 use bevy::{color::palettes::css::RED, prelude::*};
 use bevy_auto_plugin::auto_plugin::*;
 
