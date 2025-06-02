@@ -5,5 +5,5 @@ use bevy_auto_plugin::auto_plugin::*;
 
 #[auto_plugin(app=app)]
 pub(crate) fn plugin(app: &mut App) {
-    target_ent::plugin(app);
+    app.add_plugins(target_ent::plugin);
 }

@@ -2,7 +2,6 @@ use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
 
 #[auto_register_type]
-#[auto_name]
 #[derive(Component, Debug, Copy, Clone, Reflect)]
 #[reflect(Component)]
 pub struct TargetEnt {
