@@ -3,19 +3,22 @@ mod enforce_exists;
 
 mod asset_tracking;
 mod audio;
+pub mod behaviors;
 mod camera;
 mod constants;
-mod demo;
 mod despawn;
 #[cfg(feature = "dev")]
 mod dev;
+mod effects;
 mod game_system_set;
 mod health;
 mod menus;
 mod pause_controller;
 mod physics;
+mod prefabs;
 mod rng;
-mod screens;
+mod scenes;
+pub mod screens;
 mod snapshot;
 mod spark;
 mod theme;
@@ -58,7 +61,10 @@ impl Plugin for GamePlugin {
         app.add_plugins(asset_tracking::plugin);
         app.add_plugins(pause_controller::plugin);
         app.add_plugins(physics::plugin);
-        app.add_plugins(demo::plugin);
+        app.add_plugins(prefabs::plugin);
+        app.add_plugins(behaviors::plugin);
+        app.add_plugins(effects::plugin);
+        app.add_plugins(scenes::plugin);
         app.add_plugins(audio::plugin);
         app.add_plugins(theme::plugin);
         app.add_plugins(menus::plugin);

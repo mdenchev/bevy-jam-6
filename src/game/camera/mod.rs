@@ -1,3 +1,4 @@
+use bevy::core_pipeline::bloom::Bloom;
 use bevy::pbr::ShadowFilteringMethod;
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
@@ -24,7 +25,8 @@ pub(crate) fn plugin(app: &mut App) {
     app.add_systems(Startup, spawn_camera);
     app.add_systems(Update, update_camera_target);
     app.insert_resource(AmbientLight {
-        brightness: 2.0,
+        color: Color::WHITE,
+        brightness: 2000.0,
         ..Default::default()
     });
 }
@@ -32,11 +34,17 @@ pub(crate) fn plugin(app: &mut App) {
 fn spawn_camera(mut commands: Commands) {
     commands.spawn((
         MainCamera,
+        Camera {
+            hdr: true,
+            ..Default::default()
+        },
+        Bloom::NATURAL,
         PanOrbitCamera {
             radius: Some(400.0),
             focus: Vec3::ZERO,
             ..Default::default()
         },
+        Transform::from_translation(Vec3::new(0.0, 660.0, -340.0)),
     ));
 }
 
