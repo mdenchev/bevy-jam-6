@@ -1,3 +1,4 @@
+pub mod spawn;
 pub mod target_ent;
 
 use bevy::prelude::*;
@@ -10,5 +11,6 @@ pub struct MovementSpeed(pub f32);
 
 #[auto_plugin(app=app)]
 pub(crate) fn plugin(app: &mut App) {
+    app.add_plugins(spawn::plugin);
     app.add_plugins(target_ent::plugin);
 }
