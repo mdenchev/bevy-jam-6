@@ -18,7 +18,7 @@ fn spawn(
     let level_ent = level_ent_q.into_inner();
     let tower_ent = tower_ent_q.into_inner();
     for (mut spawner, trans) in spawners.iter_mut() {
-        if spawner.spawn_left <= 0 {
+        if spawner.spawn_left == 0 {
             return;
         }
         if spawner.time_to_next_spawn.is_zero() {
@@ -26,7 +26,7 @@ fn spawn(
                 Name::new("Skele"),
                 spawner.spawns,
                 // TODO scale should be set in the enemy spawner
-                trans.clone().with_scale(Vec3::splat(15.)),
+                trans.with_scale(Vec3::splat(15.)),
                 TargetEnt {
                     target_ent: tower_ent,
                     within_distance: 20.0,
