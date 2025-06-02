@@ -22,6 +22,7 @@ impl FromWorld for EnemyAssets {
 #[auto_name]
 #[derive(Component, Debug, Copy, Clone, Reflect)]
 #[reflect(Component)]
+#[require(Transform)]
 pub enum Enemy {
     BaseSkele,
 }
