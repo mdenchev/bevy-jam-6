@@ -1,10 +1,7 @@
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
 
-use crate::game::{
-    prefabs::{spawner::Spawner, tower::Tower},
-    scenes::game::LevelRoot,
-};
+use crate::game::{prefabs::spawner::Spawner, scenes::game::LevelRoot};
 
 use super::target_ent::TargetEnt;
 
@@ -12,7 +9,8 @@ fn spawn(
     mut commands: Commands,
     time: Res<Time>,
     level_ent_q: Single<Entity, With<LevelRoot>>,
-    tower_ent_q: Single<Entity, With<Tower>>,
+    // TODO: add mar
+    tower_ent_q: Single<Entity /*, With<T>*/>,
     mut spawners: Query<(&mut Spawner, &Transform)>,
 ) {
     let level_ent = level_ent_q.into_inner();

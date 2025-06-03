@@ -1,21 +1,13 @@
 use crate::game::utils::extensions::vec2::Vec2Ext;
-use std::f32::consts::PI;
-use std::time::Duration;
 
 use crate::game::camera::CameraTarget;
-use crate::game::effects::lightning_ball::{LightningBall, LightningBallConduit};
 use crate::game::prefabs::bowling_ball::{BOWLING_BALL_RADIUS, BowlingBall};
-use crate::game::prefabs::bowling_pin::{BowlingPin, PIN_HEIGHT, PIN_WIDTH};
-use crate::game::prefabs::enemy::Enemy;
-use crate::game::prefabs::spawner::Spawner;
-use crate::game::prefabs::tower::Tower;
-use crate::game::prefabs::wizard::Wizard;
+use crate::game::prefabs::bowling_pin::{BowlingPin, PIN_WIDTH};
 use crate::game::screens::Screen;
 use avian3d::prelude::{
-    AngularVelocity, CenterOfMass, Collider, ExternalAngularImpulse, ExternalImpulse, Friction,
-    Mass, Restitution, RigidBody, Sensor,
+    Collider, ExternalAngularImpulse, ExternalImpulse, Friction, Mass, Restitution, RigidBody,
+    Sensor,
 };
-use bevy::color::palettes::css::GREEN;
 use bevy::ecs::spawn::SpawnIter;
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;

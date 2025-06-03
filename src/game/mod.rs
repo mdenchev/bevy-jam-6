@@ -20,7 +20,6 @@ mod rng;
 mod scenes;
 pub mod screens;
 mod snapshot;
-mod spark;
 mod theme;
 mod utils;
 
@@ -73,7 +72,6 @@ impl Plugin for GamePlugin {
         app.add_plugins(menus::plugin);
         app.add_plugins(screens::plugin);
         app.add_plugins(health::plugin);
-        app.add_plugins(spark::plugin);
         app.add_plugins(despawn::plugin::<PreUpdate>);
     }
 }
