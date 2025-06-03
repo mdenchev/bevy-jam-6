@@ -29,6 +29,7 @@ fn spawn(
                 trans.with_scale(Vec3::splat(15.)),
                 TargetEnt {
                     target_ent: tower_ent,
+                    // TODO migrate to using colliders for determining proximity
                     within_distance: 20.0,
                 },
             ));
