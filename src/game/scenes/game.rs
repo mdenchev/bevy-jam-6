@@ -1,7 +1,6 @@
 use std::f32::consts::PI;
 use std::time::Duration;
 
-use crate::game::behaviors::target_ent::TargetEnt;
 use crate::game::camera::CameraTarget;
 use crate::game::effects::lightning_ball::{LightningBall, LightningBallConduit};
 use crate::game::prefabs::enemy::Enemy;
@@ -9,7 +8,7 @@ use crate::game::prefabs::spawner::Spawner;
 use crate::game::prefabs::tower::Tower;
 use crate::game::prefabs::wizard::Wizard;
 use crate::game::screens::Screen;
-use avian3d::prelude::Collider;
+use avian3d::prelude::{Collider, RigidBody};
 use bevy::color::palettes::css::GREEN;
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
@@ -38,6 +37,8 @@ pub fn spawn_level(
                 (
                     Name::new("Grass"),
                     Mesh3d(meshes.add(Cuboid::new(1000.0, 10.0, 1000.0))),
+                    Collider::cuboid(1000.0, 10.0, 1000.0),
+                    RigidBody::Static,
                     MeshMaterial3d(materials.add(StandardMaterial {
                         base_color: Color::from(GREEN),
                         perceptual_roughness: 1.0,
@@ -54,7 +55,7 @@ pub fn spawn_level(
         ))
         .id();
 
-    let tower_ent = commands
+    let _tower_ent = commands
         .entity(level_ent)
         .with_child((
             Tower,
@@ -84,16 +85,6 @@ pub fn spawn_level(
             Transform::from_xyz(x, 10.0, y),
         ));
     }
-    // Prespawned skele
-    commands.entity(level_ent).with_child((
-        Name::new("Skele"),
-        Enemy::BaseSkele,
-        Transform::from_xyz(100.0, 10.0, 100.0).with_scale(Vec3::splat(15.0)),
-        TargetEnt {
-            target_ent: tower_ent,
-            within_distance: 20.0,
-        },
-    ));
 }
 
 /// Generate points along a circle.

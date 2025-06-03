@@ -1,4 +1,7 @@
+use std::f32::consts::PI;
+
 use crate::game::asset_tracking::LoadResource;
+use avian3d::prelude::{Collider, LockedAxes, RigidBody};
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
 
@@ -65,8 +68,25 @@ fn on_enemy_added(
     // MovementSpeed
     let movement_speed = MovementSpeed(enemy.default_move_speed());
 
-    commands
-        .entity(trigger.target())
-        .insert(SceneRoot(gltf.scenes[0].clone()))
-        .insert(movement_speed);
+    commands.entity(trigger.target()).insert((
+        children![
+            (
+                SceneRoot(gltf.scenes[0].clone()),
+                // For some reason the skele meshes are 180 rotated so fixing it
+                // with a local transform.
+                Transform::from_rotation(Quat::from_rotation_y(PI))
+            ),
+            (
+                // Pary colliders are centered around origin. Meshes have lowest
+                // vertex at y=0.0. Spawning the collider allows us to adjust
+                // its position to match the mesh.
+                Collider::cylinder(1.0, 2.0),
+                // TODO remove magic constants for Y translation
+                Transform::from_translation(Vec3::Y)
+            )
+        ],
+        RigidBody::Kinematic,
+        LockedAxes::ROTATION_LOCKED,
+        movement_speed,
+    ));
 }
