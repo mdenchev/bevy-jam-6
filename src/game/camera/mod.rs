@@ -26,7 +26,7 @@ pub(crate) fn plugin(app: &mut App) {
     app.add_systems(Update, update_camera_target);
     app.insert_resource(AmbientLight {
         color: Color::WHITE,
-        brightness: 2000.0,
+        brightness: 100.0,
         ..Default::default()
     });
 }
@@ -40,11 +40,11 @@ fn spawn_camera(mut commands: Commands) {
         },
         Bloom::NATURAL,
         PanOrbitCamera {
-            radius: Some(400.0),
+            radius: Some(1.0),
             focus: Vec3::ZERO,
             ..Default::default()
         },
-        Transform::from_translation(Vec3::new(0.0, 660.0, -340.0)),
+        Transform::from_translation(Vec3::new(0.0, 10.0, 100.0)),
     ));
 }
 

@@ -22,10 +22,12 @@ pub mod screens;
 mod snapshot;
 mod spark;
 mod theme;
+mod utils;
 
 use crate::game::rng::RngPlugin;
 use bevy::app::PluginGroupBuilder;
 use bevy::asset::AssetMetaCheck;
+use bevy::asset::ron::extensions;
 #[cfg(feature = "dev_frame_count_log")]
 use bevy::log::LogPlugin;
 use bevy::prelude::*;
@@ -55,6 +57,7 @@ impl Plugin for GamePlugin {
         // Internal
         app.add_plugins(RngPlugin);
         app.add_plugins(game_system_set::plugin);
+        app.add_plugins(utils::plugin);
         app.add_plugins(camera::plugin);
         #[cfg(feature = "dev")]
         app.add_plugins(dev::plugin);
