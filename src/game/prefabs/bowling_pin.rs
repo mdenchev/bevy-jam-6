@@ -98,6 +98,6 @@ fn on_added(
         CenterOfMass::new(0.0, -0.05, 0.0),
         // Collider::cylinder(PIN_WIDTH / 2.0, PIN_HEIGHT),
         collider,
-        transform.with_translation(transform.translation + Vec3::Y * (PIN_HEIGHT / 2.0 + 0.06)),
+        transform.with_translation(transform.translation + Vec3::Y * (PIN_HEIGHT / 2.0)),
     ));
 }
