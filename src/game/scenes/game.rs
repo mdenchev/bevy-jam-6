@@ -10,7 +10,7 @@ use crate::game::prefabs::player::Player;
 use crate::game::scenes::simple_bowling::{Facing, generate_pin_layout};
 use crate::game::screens::Screen;
 use crate::game::utils::extensions::vec2::Vec2Ext;
-use avian3d::prelude::ExternalAngularImpulse;
+use avian3d::prelude::{ExternalAngularImpulse, ExternalImpulse, Friction, Mass};
 use bevy::pbr::{CascadeShadowConfigBuilder, DirectionalLightShadowMap};
 use bevy::prelude::*;
 use bevy::scene::SceneInstanceReady;
@@ -49,21 +49,30 @@ fn spawn_extras_on_instance_ready(
         .despawn();
     info!("spawning player");
     game_world_marker.spawn_in_player_spawn(
-        (BowlingBall, ExternalAngularImpulse::new(Vec3::X * 5.0)),
-        Some(Transform::from_scale(Vec3::splat(10.0))),
+        (
+            BowlingBall,
+            CameraTarget,
+            ExternalAngularImpulse::new(Vec3::X * 10.0),
+            ExternalImpulse::new(Vec3::Z * 1000.0),
+            Mass(20.0),
+        ),
+        Some(Transform::from_scale(Vec3::splat(20.0))),
     );
-    let player = game_world_marker.spawn_in_player_spawn((Player, CameraTarget), None);
+    let player = game_world_marker.spawn_in_player_spawn((Player), None);
     info!("spawning enemies");
-    for pos in generate_pin_layout(20.0, 1.5, 3, Facing::Toward) {
+    for pos in generate_pin_layout(5.0, 0.5, 3, Facing::Toward) {
         game_world_marker.spawn_in_enemy_spawn(
             (
                 Enemy::BaseSkele,
+                Mass(1.0),
+                Friction::new(0.4),
                 TargetEnt {
-                    target_ent: player,
+                    // TODO: spawn point doesnt work?
+                    target_ent: player, // game_world_marker.player_spawn.entity,
                     within_distance: 10.0,
                 },
             ),
-            Some(Transform::from_scale(Vec3::splat(10.0)).with_translation(pos.to_vec3())),
+            Some(Transform::from_scale(Vec3::splat(4.0)).with_translation(pos.to_vec3())),
         );
     }
 }
