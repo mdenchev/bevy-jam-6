@@ -2,7 +2,7 @@
 
 use crate::game::menus::Menu;
 use crate::game::pause_controller::Pause;
-use crate::game::scenes::game::spawn_level;
+use crate::game::scenes::simple_bowling::spawn_level;
 use crate::game::screens::Screen;
 use bevy::{input::common_conditions::input_just_pressed, prelude::*, ui::Val::*};
 use bevy_auto_plugin::auto_plugin::*;
