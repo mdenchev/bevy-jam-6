@@ -2,6 +2,7 @@
 
 mod gameplay;
 mod loading;
+mod skein_server;
 mod splash;
 mod title;
 
@@ -19,6 +20,7 @@ pub enum Screen {
     Title,
     Loading,
     Gameplay,
+    SkeinServer,
 }
 
 #[auto_plugin(app=app)]
@@ -28,5 +30,6 @@ pub(super) fn plugin(app: &mut App) {
         loading::plugin,
         splash::plugin,
         title::plugin,
+        skein_server::plugin,
     ));
 }
