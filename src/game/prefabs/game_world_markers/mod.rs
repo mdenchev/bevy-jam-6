@@ -141,6 +141,7 @@ pub struct GameWorldMarkerSystemParam<'w, 's> {
     pub commands: Commands<'w, 's>,
     pub game_world: Single<'w, EntityWithGlobalTransformQueryData, With<GameWorld>>,
     pub player_spawn: Single<'w, EntityWithGlobalTransformQueryData, With<PlayerSpawnMarker>>,
+    pub enemy_spawn: Single<'w, EntityWithGlobalTransformQueryData, With<EnemySpawnMarker>>,
     pub transform_helper: TransformHelper<'w, 's>,
 }
 
@@ -172,6 +173,30 @@ impl GameWorldMarkerSystemParam<'_, '_> {
 
         let transform_target =
             player_spawn_global_transform.reparented_to(&game_world_global_transform);
+        // remove scale before applying transform and re-add it back
+        let final_transform =
+            (transform.with_scale(Vec3::splat(1.0)) * transform_target).with_scale(transform.scale);
+        let child = self.commands.spawn(bundle).insert(final_transform).id();
+        self.commands
+            .entity(self.game_world.entity)
+            .add_child(child);
+        child
+    }
+
+    pub fn spawn_in_enemy_spawn(
+        &mut self,
+        bundle: impl Bundle,
+        transform: Option<Transform>,
+    ) -> Entity {
+        let transform = transform.unwrap_or_default();
+        let enemy_spawn_global_transform =
+            self.get_or_compute_global_transform(&self.enemy_spawn, "EnemySpawnMarker");
+
+        let game_world_global_transform =
+            self.get_or_compute_global_transform(&self.game_world, "GameWorld");
+
+        let transform_target =
+            enemy_spawn_global_transform.reparented_to(&game_world_global_transform);
         // remove scale before applying transform and re-add it back
         let final_transform =
             (transform.with_scale(Vec3::splat(1.0)) * transform_target).with_scale(transform.scale);
