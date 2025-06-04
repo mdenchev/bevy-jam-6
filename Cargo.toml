@@ -23,6 +23,7 @@ bevy-inspector-egui = { git = "https://github.com/StrikeForceZero/bevy-inspector
 egui_dock = { version = "0.16", optional = true }
 smart-default = { version = "0.7" }
 itertools = { version = "0.14" }
+bevy_skein = { git = "https://github.com/rust-adventure/skein", branch = "main" }
 # Compile low-severity logs out of native builds for performance.
 log = { version = "0.4", features = [
     "max_level_debug",
