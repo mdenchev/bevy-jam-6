@@ -18,7 +18,7 @@ impl FromWorld for EnemyAssets {
     fn from_world(world: &mut World) -> Self {
         let assets = world.resource::<AssetServer>();
         Self {
-            base_skele: assets.load("models/enemies/Skeleton_Minion.glb"),
+            base_skele: assets.load("models/enemies/LowPolySkeletonRigged.glb"),
         }
     }
 }
@@ -85,7 +85,7 @@ fn on_enemy_added(
                 Transform::from_translation(Vec3::Y)
             )
         ],
-        RigidBody::Kinematic,
+        RigidBody::Dynamic,
         LockedAxes::ROTATION_LOCKED,
         movement_speed,
     ));

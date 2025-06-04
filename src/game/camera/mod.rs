@@ -21,6 +21,7 @@ pub struct CameraTarget;
 
 #[auto_plugin(app=app)]
 pub(crate) fn plugin(app: &mut App) {
+    app.add_observer(single_camera_target);
     app.add_plugins(PanOrbitCameraPlugin);
     app.add_systems(Startup, spawn_camera);
     app.add_systems(Update, update_camera_target);
@@ -46,6 +47,19 @@ fn spawn_camera(mut commands: Commands) {
         },
         Transform::from_translation(Vec3::new(0.0, 10.0, 100.0)),
     ));
+}
+
+fn single_camera_target(
+    trigger: Trigger<OnAdd, CameraTarget>,
+    mut commands: Commands,
+    camera_targets: Query<(Entity, Ref<CameraTarget>), With<CameraTarget>>,
+) {
+    for (entity, camera_target) in camera_targets.iter() {
+        if entity == trigger.target() || camera_target.is_added() {
+            continue;
+        }
+        commands.entity(entity).try_despawn();
+    }
 }
 
 fn update_camera_target(

@@ -1,9 +1,15 @@
+use crate::game::behaviors::target_ent::TargetEnt;
+use crate::game::camera::CameraTarget;
 use crate::game::prefabs::bowling_ball::BowlingBall;
+use crate::game::prefabs::enemy::Enemy;
 use crate::game::prefabs::game_world::GameWorld;
 use crate::game::prefabs::game_world_markers::{
     GameWorldMarkerSystemParam, auto_collider_mesh_obs,
 };
+use crate::game::prefabs::player::Player;
+use crate::game::scenes::simple_bowling::{Facing, generate_pin_layout};
 use crate::game::screens::Screen;
+use crate::game::utils::extensions::vec2::Vec2Ext;
 use avian3d::prelude::ExternalAngularImpulse;
 use bevy::pbr::{CascadeShadowConfigBuilder, DirectionalLightShadowMap};
 use bevy::prelude::*;
@@ -15,7 +21,7 @@ pub fn spawn_level(mut commands: Commands) {
     commands
         .spawn((GameWorld, StateScoped(Screen::Gameplay)))
         .observe(auto_collider_mesh_obs)
-        .observe(spawn_player_on_instance_ready)
+        .observe(spawn_extras_on_instance_ready)
         .with_child((
             Name::new("Sun"),
             DirectionalLight {
@@ -32,7 +38,7 @@ pub fn spawn_level(mut commands: Commands) {
         ));
 }
 
-fn spawn_player_on_instance_ready(
+fn spawn_extras_on_instance_ready(
     trigger: Trigger<SceneInstanceReady>,
     mut game_world_marker: GameWorldMarkerSystemParam,
 ) {
@@ -46,6 +52,20 @@ fn spawn_player_on_instance_ready(
         (BowlingBall, ExternalAngularImpulse::new(Vec3::X * 5.0)),
         Some(Transform::from_scale(Vec3::splat(10.0))),
     );
+    let player = game_world_marker.spawn_in_player_spawn((Player, CameraTarget), None);
+    info!("spawning enemies");
+    for pos in generate_pin_layout(20.0, 1.5, 3, Facing::Toward) {
+        game_world_marker.spawn_in_enemy_spawn(
+            (
+                Enemy::BaseSkele,
+                TargetEnt {
+                    target_ent: player,
+                    within_distance: 10.0,
+                },
+            ),
+            Some(Transform::from_scale(Vec3::splat(10.0)).with_translation(pos.to_vec3())),
+        );
+    }
 }
 
 #[auto_plugin(app=app)]
