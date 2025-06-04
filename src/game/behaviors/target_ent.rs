@@ -1,11 +1,15 @@
 use super::MovementSpeed;
 use crate::game::pause_controller::PausableSystems;
+use crate::game::prefabs::bowling_ball::BowlingBall;
+use crate::game::prefabs::enemy::Enemy;
+use avian3d::prelude::CollidingEntities;
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
 
 #[auto_register_type]
 #[derive(Component, Debug, Copy, Clone, Reflect)]
 #[reflect(Component)]
+#[require(CollidingEntities)]
 pub struct TargetEnt {
     pub target_ent: Entity,
     pub within_distance: f32,
@@ -14,10 +18,27 @@ pub struct TargetEnt {
 fn target_ent_sys(
     mut commands: Commands,
     time: Res<Time>,
-    target_q: Query<(Entity, &TargetEnt, Option<&MovementSpeed>)>,
+    target_q: Query<(
+        Entity,
+        &TargetEnt,
+        &CollidingEntities,
+        Option<&MovementSpeed>,
+    )>,
+    bowling_ball: Query<&BowlingBall>,
+    enemies: Query<&Enemy>,
     mut transform_q: Query<&mut Transform>,
 ) {
-    for (self_ent, &target, movement_speed) in target_q.iter() {
+    for (self_ent, &target, colliding_entities, movement_speed) in target_q.iter() {
+        // don't try to move if hit by bowling ball
+        if colliding_entities
+            .0
+            .iter()
+            .any(|&c| bowling_ball.contains(c) || enemies.contains(c))
+        {
+            // TODO: we should only temporarily block moving and see if the enemy is knocked down
+            commands.entity(self_ent).remove::<TargetEnt>();
+            continue;
+        }
         let target_ent = target.target_ent;
         // If target ent no longer exists, remove component
         let Ok(target_trans) = transform_q.get(target_ent).cloned() else {
