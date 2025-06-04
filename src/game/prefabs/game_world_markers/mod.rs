@@ -1,5 +1,9 @@
 use crate::game::prefabs::game_world::GameWorld;
-use avian3d::prelude::{Collider, ColliderConstructor, RigidBody, VhacdParameters};
+use avian3d::parry::mass_properties::MassProperties;
+use avian3d::prelude::{
+    AngularInertia, CenterOfMass, Collider, ColliderConstructor, Mass, NoAutoAngularInertia,
+    NoAutoCenterOfMass, NoAutoMass, RigidBody, VhacdParameters,
+};
 use bevy::ecs::query::QueryData;
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
@@ -36,32 +40,30 @@ pub struct OutOfBoundsMarker;
 pub struct LoadFinishedEvent;
 
 #[auto_register_type]
-#[derive(Component, Debug, Default, Copy, Clone, Reflect)]
-#[reflect(Component)]
-#[require(Transform)]
-pub struct AutoColliderMesh;
-
-#[auto_register_type]
-#[derive(Component, Debug, Copy, Clone, Reflect)]
-#[reflect(Component)]
-#[require(Transform)]
-#[require(AutoColliderMesh)]
-pub struct AutoColliderMeshNoApprox;
+#[derive(Debug, Default, Copy, Clone, Reflect)]
+pub enum Method {
+    #[default]
+    ConvexHull,
+    ConvexDecomposition,
+    ConvexDecompositionNoApprox,
+    TriMesh,
+}
 
 #[auto_register_type]
 #[derive(Component, Debug, SmartDefault, Copy, Clone, Reflect)]
 #[reflect(Component)]
 #[require(Transform)]
-pub struct DelayedRigidBody(#[default(RigidBody::Static)] RigidBody);
+pub struct AutoColliderMesh {
+    method: Method,
+}
 
 pub fn auto_collider_mesh_obs(
     trigger: Trigger<SceneInstanceReady>,
     mut commands: Commands,
     auto_collider_mesh_q: Query<
-        (Entity, Ref<AutoColliderMesh>, Has<AutoColliderMeshNoApprox>),
+        (Entity, Ref<AutoColliderMesh>, Option<&RigidBody>),
         Added<AutoColliderMesh>,
     >,
-    delayed_rigid_body_q: Query<(Entity, Ref<DelayedRigidBody>), Added<DelayedRigidBody>>,
     added_mesh3d_q: Query<(Ref<Mesh3d>, Has<Collider>), Added<Mesh3d>>,
     children_q: Query<&Children>,
 ) {
@@ -69,17 +71,7 @@ pub fn auto_collider_mesh_obs(
     let entity = trigger.target();
     info!("Trigger<SceneInstanceReady> {entity}");
     for child in children_q.iter_descendants(entity) {
-        if let Ok((entity, delayed_rigid_body)) = delayed_rigid_body_q.get(child) {
-            if delayed_rigid_body.is_added() {
-                info!("DelayedRigidBody {entity} {delayed_rigid_body:?}");
-                commands
-                    .entity(entity)
-                    .remove::<DelayedRigidBody>()
-                    .insert(delayed_rigid_body.0);
-            }
-        }
-        let Ok((entity, auto_collider_mesh_ref, has_auto_collider_mesh_no_approx)) =
-            auto_collider_mesh_q.get(child)
+        let Ok((entity, auto_collider_mesh_ref, rigid_body_opt)) = auto_collider_mesh_q.get(child)
         else {
             continue;
         };
@@ -98,22 +90,48 @@ pub fn auto_collider_mesh_obs(
             }
             info!("ConvexHullFromMesh {entity}");
             let mut entity_cmds = commands.entity(entity);
-            if !has_auto_collider_mesh_no_approx {
-                entity_cmds.insert(ColliderConstructor::ConvexHullFromMesh);
-            } else {
-                entity_cmds.insert(ColliderConstructor::ConvexDecompositionFromMeshWithConfig(
-                    VhacdParameters {
-                        convex_hull_approximation: false,
-                        ..Default::default()
-                    },
+            let has_rigid_body = rigid_body_opt.is_some();
+            let rigid_body = rigid_body_opt.copied().unwrap_or(RigidBody::Static);
+            if matches!(rigid_body, RigidBody::Static) {
+                // required for large meshes to prevent: assertion failed: self.is_normalized()
+                //  avian3d::dynamics::rigid_body::mass_properties::update_mass_properties
+                entity_cmds.insert((
+                    NoAutoMass,
+                    NoAutoAngularInertia,
+                    NoAutoCenterOfMass,
+                    Mass::ZERO,
+                    AngularInertia::ZERO,
+                    CenterOfMass::ZERO,
                 ));
+            }
+            if !has_rigid_body {
+                entity_cmds.insert(rigid_body);
+            }
+            match auto_collider_mesh_ref.method {
+                Method::ConvexHull => {
+                    entity_cmds.insert(ColliderConstructor::ConvexHullFromMesh);
+                }
+                Method::ConvexDecomposition => {
+                    entity_cmds.insert(ColliderConstructor::ConvexDecompositionFromMesh);
+                }
+                Method::ConvexDecompositionNoApprox => {
+                    entity_cmds.insert(ColliderConstructor::ConvexDecompositionFromMeshWithConfig(
+                        VhacdParameters {
+                            convex_hull_approximation: false,
+                            ..Default::default()
+                        },
+                    ));
+                }
+                Method::TriMesh => {
+                    entity_cmds.insert(ColliderConstructor::TrimeshFromMesh);
+                }
             }
         }
     }
 }
 
 #[derive(QueryData)]
-pub struct EntityWithGlobalTransform {
+pub struct EntityWithGlobalTransformQueryData {
     pub entity: Entity,
     pub global_transform: Ref<'static, GlobalTransform>,
 }
@@ -121,22 +139,43 @@ pub struct EntityWithGlobalTransform {
 #[derive(SystemParam)]
 pub struct GameWorldMarkerSystemParam<'w, 's> {
     pub commands: Commands<'w, 's>,
-    pub game_world: Single<'w, EntityWithGlobalTransform, With<GameWorld>>,
-    pub player_spawn: Single<'w, EntityWithGlobalTransform, With<PlayerSpawnMarker>>,
+    pub game_world: Single<'w, EntityWithGlobalTransformQueryData, With<GameWorld>>,
+    pub player_spawn: Single<'w, EntityWithGlobalTransformQueryData, With<PlayerSpawnMarker>>,
+    pub transform_helper: TransformHelper<'w, 's>,
 }
 
 impl GameWorldMarkerSystemParam<'_, '_> {
-    pub fn spawn_in_player_spawn(&mut self, bundle: impl Bundle, transform: Option<Transform>) {
+    pub fn spawn_in_player_spawn(
+        &mut self,
+        bundle: impl Bundle,
+        transform: Option<Transform>,
+    ) -> Entity {
         let transform = transform.unwrap_or_default();
-        let transform_target = self
-            .player_spawn
-            .global_transform
-            .reparented_to(&self.game_world.global_transform);
-        let final_transform = transform * transform_target;
+        let get_or_compute_gt =
+            |target: &EntityWithGlobalTransformQueryDataItem, error_msg: &str| -> GlobalTransform {
+                let gt_res = if *target.global_transform == GlobalTransform::default() {
+                    self.transform_helper
+                        .compute_global_transform(target.entity)
+                } else {
+                    Ok(*target.global_transform)
+                };
+                gt_res.expect(error_msg)
+            };
+        let player_spawn_global_transform =
+            get_or_compute_gt(&self.player_spawn, "PlayerSpawnMarker");
+
+        let game_world_global_transform = get_or_compute_gt(&self.game_world, "GameWorld");
+
+        let transform_target =
+            player_spawn_global_transform.reparented_to(&game_world_global_transform);
+        // remove scale before applying transform and re-add it back
+        let final_transform =
+            (transform.with_scale(Vec3::splat(1.0)) * transform_target).with_scale(transform.scale);
         let child = self.commands.spawn(bundle).insert(final_transform).id();
         self.commands
             .entity(self.game_world.entity)
             .add_child(child);
+        child
     }
 }
 

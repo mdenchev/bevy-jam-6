@@ -40,7 +40,7 @@ fn spawn_camera(mut commands: Commands) {
         },
         Bloom::NATURAL,
         PanOrbitCamera {
-            radius: Some(1.0),
+            radius: Some(100.0),
             focus: Vec3::ZERO,
             ..Default::default()
         },

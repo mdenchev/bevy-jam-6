@@ -43,7 +43,7 @@ fn spawn_player_on_instance_ready(
         .despawn();
     info!("spawning player");
     game_world_marker.spawn_in_player_spawn(
-        (BowlingBall, ExternalAngularImpulse::new(Vec3::X * 100.0)),
+        (BowlingBall, ExternalAngularImpulse::new(Vec3::X * 5.0)),
         Some(Transform::from_scale(Vec3::splat(10.0))),
     );
 }
