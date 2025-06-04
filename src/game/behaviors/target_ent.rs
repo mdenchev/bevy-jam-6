@@ -18,19 +18,20 @@ fn target_ent_sys(
     mut transform_q: Query<&mut Transform>,
 ) {
     for (self_ent, &target, movement_speed) in target_q.iter() {
-        // TODO remove need for taking this into consideration
-        let ground_height = 10.0;
         let target_ent = target.target_ent;
         // If target ent no longer exists, remove component
         let Ok(target_trans) = transform_q.get(target_ent).cloned() else {
             commands.entity(self_ent).remove::<TargetEnt>();
             return;
         };
+        let transform = transform_q
+            .get(self_ent)
+            .expect("no transform found for TargetEnt");
         // Remove y component as some objects are not at ground level (e.g.
         // tower center is at this point in time in the middle of its mesh).
         let target_trans = target_trans.with_translation(Vec3::new(
             target_trans.translation.x,
-            ground_height,
+            transform.translation.y,
             target_trans.translation.z,
         ));
 
