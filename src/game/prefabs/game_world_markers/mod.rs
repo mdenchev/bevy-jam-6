@@ -145,26 +145,30 @@ pub struct GameWorldMarkerSystemParam<'w, 's> {
 }
 
 impl GameWorldMarkerSystemParam<'_, '_> {
+    fn get_or_compute_global_transform(
+        &self,
+        target: &EntityWithGlobalTransformQueryDataItem,
+        error_msg: &str,
+    ) -> GlobalTransform {
+        let gt_res = if *target.global_transform == GlobalTransform::default() {
+            self.transform_helper
+                .compute_global_transform(target.entity)
+        } else {
+            Ok(*target.global_transform)
+        };
+        gt_res.expect(error_msg)
+    }
     pub fn spawn_in_player_spawn(
         &mut self,
         bundle: impl Bundle,
         transform: Option<Transform>,
     ) -> Entity {
         let transform = transform.unwrap_or_default();
-        let get_or_compute_gt =
-            |target: &EntityWithGlobalTransformQueryDataItem, error_msg: &str| -> GlobalTransform {
-                let gt_res = if *target.global_transform == GlobalTransform::default() {
-                    self.transform_helper
-                        .compute_global_transform(target.entity)
-                } else {
-                    Ok(*target.global_transform)
-                };
-                gt_res.expect(error_msg)
-            };
         let player_spawn_global_transform =
-            get_or_compute_gt(&self.player_spawn, "PlayerSpawnMarker");
+            self.get_or_compute_global_transform(&self.player_spawn, "PlayerSpawnMarker");
 
-        let game_world_global_transform = get_or_compute_gt(&self.game_world, "GameWorld");
+        let game_world_global_transform =
+            self.get_or_compute_global_transform(&self.game_world, "GameWorld");
 
         let transform_target =
             player_spawn_global_transform.reparented_to(&game_world_global_transform);
