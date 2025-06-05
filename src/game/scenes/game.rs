@@ -1,11 +1,12 @@
 use crate::game::behaviors::target_ent::TargetEnt;
-use crate::game::camera::CameraTarget;
+use crate::game::camera::{CameraTarget, MainCamera};
 use crate::game::effects::lightning_ball::{LightningBall, LightningBallConduit};
 use crate::game::prefabs::bowling_ball::BowlingBall;
 use crate::game::prefabs::enemy::Enemy;
 use crate::game::prefabs::game_world::GameWorld;
 use crate::game::prefabs::game_world_markers::{
-    GameWorldMarkerSystemParam, auto_collider_mesh_obs,
+    EntityWithGlobalTransformQueryData, GameWorldMarkerSystemParam, TempleLight, TempleRoof,
+    auto_collider_mesh_obs,
 };
 use crate::game::prefabs::player::{Player, PlayerSystemParam};
 use crate::game::scenes::simple_bowling::{Facing, generate_pin_layout};
@@ -145,7 +146,52 @@ fn demo_input(
     }
 }
 
+// TODO: move
+fn get_pitch_and_roll(quat: Quat) -> (f32, f32) {
+    // Local forward and right vectors
+    let local_forward = Vec3::Z;
+    let local_right = Vec3::X;
+
+    // Transform to world space
+    let world_forward = quat * local_forward;
+    let world_right = quat * local_right;
+
+    // Pitch: angle between forward vector and horizontal plane (XZ)
+    let pitch = world_forward
+        .y
+        .atan2((world_forward.x.powi(2) + world_forward.z.powi(2)).sqrt());
+
+    // Roll: angle between right vector and horizontal plane (YZ)
+    let roll = world_right
+        .y
+        .atan2((world_right.x.powi(2) + world_right.z.powi(2)).sqrt());
+
+    (pitch, roll)
+}
+
+fn hide_roof(
+    mut commands: Commands,
+    roof: Single<(Entity, &Visibility), With<TempleRoof>>,
+    light: Single<(Entity, &Visibility), With<TempleLight>>,
+    main_camera: Single<EntityWithGlobalTransformQueryData, With<MainCamera>>,
+) {
+    let (pitch, roll) = get_pitch_and_roll(main_camera.global_transform.rotation());
+    let past_threshold = pitch >= 0.24;
+    let mut toggle_visibility = |(entity, visibility): (Entity, &Visibility)| {
+        if past_threshold && matches!(visibility, Visibility::Visible | Visibility::Inherited) {
+            info!("hiding {entity}");
+            commands.entity(entity).insert(Visibility::Hidden);
+        } else if !past_threshold && matches!(visibility, Visibility::Hidden) {
+            info!("revealing {entity}");
+            commands.entity(entity).insert(Visibility::Inherited);
+        }
+    };
+    toggle_visibility(*roof);
+    toggle_visibility(*light);
+}
+
 #[auto_plugin(app=app)]
 pub(crate) fn plugin(app: &mut App) {
     app.add_systems(Update, demo_input);
+    app.add_systems(Update, hide_roof);
 }
