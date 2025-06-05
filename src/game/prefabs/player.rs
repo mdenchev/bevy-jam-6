@@ -23,7 +23,10 @@ impl FromWorld for PlayerAssets {
     fn from_world(world: &mut World) -> Self {
         let assets = world.resource::<AssetServer>();
         Self {
-            scene: assets.load(GltfAssetLabel::Scene(0).from_asset("models/zeus/zeus_rigged.glb")),
+            scene: assets.load(
+                GltfAssetLabel::Scene(0)
+                    .from_asset("models/zeus/zeus_rigged_manual_bowling_ball.glb"),
+            ),
         }
     }
 }
