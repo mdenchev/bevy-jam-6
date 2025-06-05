@@ -47,11 +47,15 @@ impl FromWorld for PlayerAssets {
 
 #[derive(SystemParam)]
 pub struct PlayerSystemParam<'w, 's> {
+    pub player_transform: Single<'w, Ref<'static, Transform>, With<Player>>,
     player: SpawnHelper<'w, 's, GameWorld, Player>,
     pub bowling_ball_spawn: SpawnHelper<'w, 's, GameWorld, BowlingBallSpawnMarker>,
 }
 
 impl PlayerSystemParam<'_, '_> {
+    pub fn entity(&self) -> Entity {
+        self.player.target_q.entity
+    }
     pub fn get_player_rotation(&self) -> Quat {
         self.player.compute_target_local_transform(None).rotation
     }

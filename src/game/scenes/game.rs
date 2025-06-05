@@ -16,6 +16,8 @@ use bevy::pbr::{CascadeShadowConfigBuilder, DirectionalLightShadowMap};
 use bevy::prelude::*;
 use bevy::scene::SceneInstanceReady;
 use bevy_auto_plugin::auto_plugin::*;
+use smart_default::SmartDefault;
+use std::ops::{Deref, DerefMut};
 
 pub fn spawn_level(mut commands: Commands) {
     info!("spawning world");
@@ -48,15 +50,6 @@ fn spawn_extras_on_instance_ready(
     commands.entity(trigger.observer()).despawn();
     info!("spawning player");
     let player = game_world_marker.spawn_in_player_spawn(Player, None);
-    commands.entity(player).observe(
-        |trigger: Trigger<SceneInstanceReady>,
-         mut commands: Commands,
-         mut player_sp: PlayerSystemParam| {
-            info!("spawning demo ball");
-            commands.entity(trigger.observer()).despawn();
-            player_sp.spawn_bowling_ball(1.0, 0.0);
-        },
-    );
     info!("spawning enemies");
     for pos in generate_pin_layout(5.0, 0.5, 3, Facing::Toward) {
         game_world_marker.spawn_in_enemy_spawn(
@@ -76,5 +69,83 @@ fn spawn_extras_on_instance_ready(
     }
 }
 
+#[derive(Debug, SmartDefault)]
+struct DemoCache {
+    #[default = 1.0]
+    power: f32,
+    #[default = 0.0]
+    accuracy: f32,
+    #[default = 1.0]
+    turn_rate: f32,
+}
+fn demo_input(
+    time: Res<Time>,
+    mut commands: Commands,
+    mut local: Local<(bool, DemoCache)>,
+    mut player_system_param: PlayerSystemParam,
+    button_input: Res<ButtonInput<KeyCode>>,
+) {
+    let mut apply_transform = |transform: Transform| {
+        commands
+            .entity(player_system_param.entity())
+            .insert(transform);
+    };
+    let (changed, cache) = &mut *local;
+    if button_input.pressed(KeyCode::ArrowLeft) {
+        cache.accuracy += 1.0;
+        *changed = true;
+    }
+    if button_input.pressed(KeyCode::ArrowRight) {
+        cache.accuracy -= 1.0;
+        *changed = true;
+    }
+    if button_input.pressed(KeyCode::ArrowUp) {
+        cache.power += 0.1;
+        *changed = true;
+    }
+    if button_input.pressed(KeyCode::ArrowDown) {
+        cache.power -= 0.1;
+        *changed = true;
+    }
+    if button_input.pressed(KeyCode::KeyW) {
+        cache.turn_rate += 1.0;
+        cache.turn_rate = cache.turn_rate.max(1.0);
+        *changed = true;
+    }
+    if button_input.pressed(KeyCode::KeyS) {
+        cache.turn_rate -= 1.0;
+        cache.turn_rate = cache.turn_rate.max(1.0);
+        *changed = true;
+    }
+    if button_input.pressed(KeyCode::KeyA) {
+        let mut transform = player_system_param.player_transform.clone();
+        transform.rotate(Quat::from_rotation_y(
+            1_f32.to_radians() * cache.turn_rate * time.delta_secs(),
+        ));
+        apply_transform(transform);
+        *changed = true;
+    }
+    if button_input.pressed(KeyCode::KeyD) {
+        let mut transform = player_system_param.player_transform.clone();
+        transform.rotate(Quat::from_rotation_y(
+            -1_f32.to_radians() * cache.turn_rate * time.delta_secs(),
+        ));
+        apply_transform(transform);
+        *changed = true;
+    }
+    if *changed {
+        *changed = false;
+        info!(
+            "demo value updated: {cache:?} player_rotation: {}",
+            player_system_param.player_transform.rotation
+        );
+    }
+    if button_input.just_pressed(KeyCode::Space) {
+        player_system_param.spawn_bowling_ball(cache.power, cache.accuracy);
+    }
+}
+
 #[auto_plugin(app=app)]
-pub(crate) fn plugin(app: &mut App) {}
+pub(crate) fn plugin(app: &mut App) {
+    app.add_systems(Update, demo_input);
+}
