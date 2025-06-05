@@ -6,7 +6,7 @@ use crate::game::prefabs::game_world::GameWorld;
 use crate::game::prefabs::game_world_markers::{
     BowlingBallSpawnMarker, ComponentName, EntityWithGlobalTransformQueryData, SpawnHelper,
 };
-use avian3d::prelude::{ExternalAngularImpulse, ExternalImpulse, Mass, RigidBody};
+use avian3d::prelude::{Collider, ExternalAngularImpulse, ExternalImpulse, Mass, RigidBody};
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
@@ -93,5 +93,5 @@ fn on_added(trigger: Trigger<OnAdd, Player>, assets: Res<PlayerAssets>, mut comm
     let entity = trigger.target();
     commands
         .entity(entity)
-        .insert(SceneRoot(assets.scene.clone()));
+        .insert((SceneRoot(assets.scene.clone()), Collider::capsule(3.0, 8.0)));
 }
