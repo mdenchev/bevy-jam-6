@@ -250,7 +250,7 @@ where
         self.get_or_compute_global_transform::<Parent>(&self.parent_q)
     }
 
-    pub fn spawn_in(&mut self, bundle: impl Bundle, transform: Option<Transform>) -> Entity {
+    pub fn compute_target_local_transform(&self, transform: Option<Transform>) -> Transform {
         let transform = transform.unwrap_or_default();
         let target_global_transform = self.target_get_or_compute_global_transform();
 
@@ -258,8 +258,11 @@ where
 
         let transform_target = target_global_transform.reparented_to(&parent_global_transform);
         // remove scale before applying transform and re-add it back
-        let final_transform =
-            (transform.with_scale(Vec3::splat(1.0)) * transform_target).with_scale(transform.scale);
+        (transform.with_scale(Vec3::splat(1.0)) * transform_target).with_scale(transform.scale)
+    }
+
+    pub fn spawn_in(&mut self, bundle: impl Bundle, transform: Option<Transform>) -> Entity {
+        let final_transform = self.compute_target_local_transform(transform);
         let child = self.commands.spawn(bundle).insert(final_transform).id();
         self.commands.entity(self.parent_q.entity).add_child(child);
         child

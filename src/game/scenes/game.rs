@@ -47,20 +47,21 @@ fn spawn_extras_on_instance_ready(
     info!("Trigger<SceneInstanceReady>");
     commands.entity(trigger.observer()).despawn();
     info!("spawning player");
-    let player = game_world_marker.spawn_in_player_spawn((Player), None);
+    let player = game_world_marker.spawn_in_player_spawn(Player, None);
     commands.entity(player).observe(
         |trigger: Trigger<SceneInstanceReady>,
          mut commands: Commands,
          mut player_sp: PlayerSystemParam| {
             info!("spawning demo ball");
             commands.entity(trigger.observer()).despawn();
+            let player_rot = player_sp.get_player_rotation();
             player_sp.spawn_bowling_ball_spawn(
                 (
                     BowlingBall,
                     LightningBall,
                     CameraTarget,
-                    ExternalAngularImpulse::new(Vec3::X * 10.0),
-                    ExternalImpulse::new(Vec3::Z * 1000.0),
+                    ExternalAngularImpulse::new(player_rot * (Vec3::X * 10.0)),
+                    ExternalImpulse::new(player_rot * (Vec3::Z * 1000.0)),
                     Mass(20.0),
                 ),
                 Some(Transform::from_scale(Vec3::splat(20.0))),

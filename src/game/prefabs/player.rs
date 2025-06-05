@@ -1,7 +1,7 @@
 use crate::game::asset_tracking::LoadResource;
 use crate::game::prefabs::game_world::GameWorld;
 use crate::game::prefabs::game_world_markers::{
-    BowlingBallSpawnMarker, EntityWithGlobalTransformQueryData, SpawnHelper,
+    BowlingBallSpawnMarker, ComponentName, EntityWithGlobalTransformQueryData, SpawnHelper,
 };
 use avian3d::prelude::RigidBody;
 use bevy::ecs::system::SystemParam;
@@ -16,6 +16,12 @@ use bevy_auto_plugin::auto_plugin::*;
 #[require(Visibility)]
 #[require(RigidBody::Kinematic)]
 pub struct Player;
+
+impl ComponentName for Player {
+    fn component_name() -> &'static str {
+        "Player"
+    }
+}
 
 #[auto_register_type]
 #[derive(Resource, Asset, Debug, Clone, Reflect)]
@@ -38,10 +44,14 @@ impl FromWorld for PlayerAssets {
 
 #[derive(SystemParam)]
 pub struct PlayerSystemParam<'w, 's> {
+    player: SpawnHelper<'w, 's, GameWorld, Player>,
     pub bowling_ball_spawn: SpawnHelper<'w, 's, GameWorld, BowlingBallSpawnMarker>,
 }
 
 impl PlayerSystemParam<'_, '_> {
+    pub fn get_player_rotation(&self) -> Quat {
+        self.player.compute_target_local_transform(None).rotation
+    }
     pub fn spawn_bowling_ball_spawn(
         &mut self,
         bundle: impl Bundle,
