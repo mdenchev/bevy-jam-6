@@ -92,12 +92,19 @@ fn demo_input(
             .insert(transform);
     };
     let (changed, cache) = &mut *local;
+    let max_accuracy_offset: f32 = 30_f32.to_radians();
     if button_input.pressed(KeyCode::ArrowLeft) {
-        cache.accuracy += 1.0;
+        cache.accuracy += 1_f32.to_radians();
+        cache.accuracy = cache
+            .accuracy
+            .clamp(-max_accuracy_offset, max_accuracy_offset);
         *changed = true;
     }
     if button_input.pressed(KeyCode::ArrowRight) {
-        cache.accuracy -= 1.0;
+        cache.accuracy -= 1_f32.to_radians();
+        cache.accuracy = cache
+            .accuracy
+            .clamp(-max_accuracy_offset, max_accuracy_offset);
         *changed = true;
     }
     if button_input.pressed(KeyCode::ArrowUp) {
