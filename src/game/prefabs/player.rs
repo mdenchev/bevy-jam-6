@@ -9,10 +9,12 @@ use crate::game::prefabs::game_world::GameWorld;
 use crate::game::prefabs::game_world_markers::{
     BowlingBallSpawnMarker, ComponentName, EntityWithGlobalTransformQueryData, SpawnHelper,
 };
+use crate::game::rng::global::GlobalRng;
 use avian3d::prelude::{Collider, ExternalAngularImpulse, ExternalImpulse, Mass, RigidBody};
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
+use rand::seq::IndexedRandom;
 
 #[auto_register_type]
 #[auto_name]
@@ -34,16 +36,24 @@ impl ComponentName for Player {
 pub struct PlayerAssets {
     #[dependency]
     pub scene: Handle<Scene>,
+    // https://pixabay.com/sound-effects/whoosh-313320/
+    #[dependency]
+    pub throw_1: Handle<AudioSource>,
+    pub throw_sounds: Vec<Handle<AudioSource>>,
 }
 
 impl FromWorld for PlayerAssets {
     fn from_world(world: &mut World) -> Self {
         let assets = world.resource::<AssetServer>();
+        let throw_1 = assets.load("audio/sound_effects/throw_1.mp3");
+        let throw_sounds = vec![throw_1.clone()];
         Self {
             scene: assets.load(
                 GltfAssetLabel::Scene(0)
                     .from_asset("models/zeus/zeus_rigged_manual_bowling_ball.glb"),
             ),
+            throw_1,
+            throw_sounds,
         }
     }
 }
@@ -52,7 +62,9 @@ impl FromWorld for PlayerAssets {
 pub struct PlayerSystemParam<'w, 's> {
     pub player_transform: Single<'w, Ref<'static, Transform>, With<Player>>,
     player: SpawnHelper<'w, 's, GameWorld, Player>,
+    player_assets: Res<'w, PlayerAssets>,
     pub bowling_ball_spawn: SpawnHelper<'w, 's, GameWorld, BowlingBallSpawnMarker>,
+    rng: GlobalRng<'w, 's>,
 }
 
 impl PlayerSystemParam<'_, '_> {
@@ -72,6 +84,8 @@ impl PlayerSystemParam<'_, '_> {
     pub fn spawn_bowling_ball(&mut self, power: f32, accuracy_offset_radians: f32) -> Entity {
         let player_rot = self.get_player_rotation();
         let accuracy_rot = player_rot * Quat::from_rotation_y(accuracy_offset_radians);
+        let rng = self.rng.rng();
+        let audio = AudioPlayer::new(self.player_assets.throw_sounds.choose(rng).unwrap().clone());
         let bowling_ball = self.spawn_bowling_ball_spawn(
             (
                 BowlingBall,
@@ -82,6 +96,7 @@ impl PlayerSystemParam<'_, '_> {
                 Despawn {
                     ttl: Duration::from_secs_f32(10.0),
                 },
+                audio,
             ),
             Some(Transform::from_scale(Vec3::splat(20.0))),
         );
