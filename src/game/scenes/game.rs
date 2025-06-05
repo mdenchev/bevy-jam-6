@@ -1,5 +1,6 @@
 use crate::game::behaviors::target_ent::TargetEnt;
 use crate::game::camera::CameraTarget;
+use crate::game::effects::lightning_ball::{LightningBall, LightningBallConduit};
 use crate::game::prefabs::bowling_ball::BowlingBall;
 use crate::game::prefabs::enemy::Enemy;
 use crate::game::prefabs::game_world::GameWorld;
@@ -51,6 +52,7 @@ fn spawn_extras_on_instance_ready(
     game_world_marker.spawn_in_player_spawn(
         (
             BowlingBall,
+            LightningBall,
             CameraTarget,
             ExternalAngularImpulse::new(Vec3::X * 10.0),
             ExternalImpulse::new(Vec3::Z * 1000.0),
@@ -64,6 +66,7 @@ fn spawn_extras_on_instance_ready(
         game_world_marker.spawn_in_enemy_spawn(
             (
                 Enemy::BaseSkele,
+                LightningBallConduit,
                 Mass(1.0),
                 Friction::new(0.4),
                 TargetEnt {
