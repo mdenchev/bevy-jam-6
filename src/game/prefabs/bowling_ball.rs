@@ -1,6 +1,6 @@
 use crate::game::asset_tracking::LoadResource;
-use avian3d::prelude::RigidBody;
 use avian3d::prelude::{Collider, Friction, Mass, Restitution};
+use avian3d::prelude::{ColliderDisabled, RigidBody};
 use bevy::ecs::query::QueryData;
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;

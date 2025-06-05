@@ -1,5 +1,10 @@
 use crate::game::asset_tracking::LoadResource;
+use crate::game::prefabs::game_world::GameWorld;
+use crate::game::prefabs::game_world_markers::{
+    BowlingBallSpawnMarker, EntityWithGlobalTransformQueryData, SpawnHelper,
+};
 use avian3d::prelude::RigidBody;
+use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
 
@@ -28,6 +33,21 @@ impl FromWorld for PlayerAssets {
                     .from_asset("models/zeus/zeus_rigged_manual_bowling_ball.glb"),
             ),
         }
+    }
+}
+
+#[derive(SystemParam)]
+pub struct PlayerSystemParam<'w, 's> {
+    pub bowling_ball_spawn: SpawnHelper<'w, 's, GameWorld, BowlingBallSpawnMarker>,
+}
+
+impl PlayerSystemParam<'_, '_> {
+    pub fn spawn_bowling_ball_spawn(
+        &mut self,
+        bundle: impl Bundle,
+        transform: Option<Transform>,
+    ) -> Entity {
+        self.bowling_ball_spawn.spawn_in(bundle, transform)
     }
 }
 

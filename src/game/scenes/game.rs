@@ -7,7 +7,7 @@ use crate::game::prefabs::game_world::GameWorld;
 use crate::game::prefabs::game_world_markers::{
     GameWorldMarkerSystemParam, auto_collider_mesh_obs,
 };
-use crate::game::prefabs::player::Player;
+use crate::game::prefabs::player::{Player, PlayerSystemParam};
 use crate::game::scenes::simple_bowling::{Facing, generate_pin_layout};
 use crate::game::screens::Screen;
 use crate::game::utils::extensions::vec2::Vec2Ext;
@@ -41,26 +41,32 @@ pub fn spawn_level(mut commands: Commands) {
 
 fn spawn_extras_on_instance_ready(
     trigger: Trigger<SceneInstanceReady>,
+    mut commands: Commands,
     mut game_world_marker: GameWorldMarkerSystemParam,
 ) {
     info!("Trigger<SceneInstanceReady>");
-    game_world_marker
-        .commands
-        .entity(trigger.observer())
-        .despawn();
+    commands.entity(trigger.observer()).despawn();
     info!("spawning player");
-    game_world_marker.spawn_in_player_spawn(
-        (
-            BowlingBall,
-            LightningBall,
-            CameraTarget,
-            ExternalAngularImpulse::new(Vec3::X * 10.0),
-            ExternalImpulse::new(Vec3::Z * 1000.0),
-            Mass(20.0),
-        ),
-        Some(Transform::from_scale(Vec3::splat(20.0))),
-    );
     let player = game_world_marker.spawn_in_player_spawn((Player), None);
+    commands.entity(player).observe(
+        |trigger: Trigger<SceneInstanceReady>,
+         mut commands: Commands,
+         mut player_sp: PlayerSystemParam| {
+            info!("spawning demo ball");
+            commands.entity(trigger.observer()).despawn();
+            player_sp.spawn_bowling_ball_spawn(
+                (
+                    BowlingBall,
+                    LightningBall,
+                    CameraTarget,
+                    ExternalAngularImpulse::new(Vec3::X * 10.0),
+                    ExternalImpulse::new(Vec3::Z * 1000.0),
+                    Mass(20.0),
+                ),
+                Some(Transform::from_scale(Vec3::splat(20.0))),
+            );
+        },
+    );
     info!("spawning enemies");
     for pos in generate_pin_layout(5.0, 0.5, 3, Facing::Toward) {
         game_world_marker.spawn_in_enemy_spawn(

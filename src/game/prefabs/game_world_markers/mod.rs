@@ -158,57 +158,127 @@ pub fn auto_collider_mesh_obs(
     }
 }
 
+// TODO: move
+pub trait ComponentName {
+    fn component_name() -> &'static str;
+}
+
+impl ComponentName for GameWorld {
+    fn component_name() -> &'static str {
+        "GameWorld"
+    }
+}
+
+impl ComponentName for PlayerSpawnMarker {
+    fn component_name() -> &'static str {
+        "PlayerSpawnMarker"
+    }
+}
+
+impl ComponentName for EnemySpawnMarker {
+    fn component_name() -> &'static str {
+        "EnemySpawnMarker"
+    }
+}
+
+impl ComponentName for BowlingBallSpawnMarker {
+    fn component_name() -> &'static str {
+        "BowlingBallSpawnMarker"
+    }
+}
+
 #[derive(QueryData)]
 pub struct EntityWithGlobalTransformQueryData {
     pub entity: Entity,
     pub global_transform: Ref<'static, GlobalTransform>,
 }
 
+#[derive(QueryData)]
+pub struct EntityWithGlobalTransformQueryDataFiltered<T>
+where
+    T: Component,
+{
+    pub entity: Entity,
+    pub global_transform: Ref<'static, GlobalTransform>,
+    _marker: &'static T,
+}
+
 #[derive(SystemParam)]
-pub struct GameWorldMarkerSystemParam<'w, 's> {
+pub struct SpawnHelper<'w, 's, Parent, Target>
+where
+    Parent: Component + ComponentName + 'static + Send + Sync,
+    Target: Component + ComponentName + 'static + Send + Sync,
+{
     pub commands: Commands<'w, 's>,
-    pub game_world: Single<'w, EntityWithGlobalTransformQueryData, With<GameWorld>>,
-    pub player_spawn: Single<'w, EntityWithGlobalTransformQueryData, With<PlayerSpawnMarker>>,
-    pub enemy_spawn: Single<'w, EntityWithGlobalTransformQueryData, With<EnemySpawnMarker>>,
+    pub parent_q: Single<'w, EntityWithGlobalTransformQueryDataFiltered<Parent>, With<Parent>>,
+    pub target_q: Single<'w, EntityWithGlobalTransformQueryDataFiltered<Target>, With<Target>>,
     pub transform_helper: TransformHelper<'w, 's>,
 }
 
-impl GameWorldMarkerSystemParam<'_, '_> {
-    fn get_or_compute_global_transform(
+impl<'w, 's, Parent, Target> SpawnHelper<'w, 's, Parent, Target>
+where
+    Parent: Component + ComponentName + 'static + Send + Sync,
+    Target: Component + ComponentName,
+{
+    fn get_or_compute_global_transform<T>(
         &self,
-        target: &EntityWithGlobalTransformQueryDataItem,
-        error_msg: &str,
-    ) -> GlobalTransform {
+        item: &EntityWithGlobalTransformQueryDataFilteredItem<T>,
+    ) -> GlobalTransform
+    where
+        T: Component + ComponentName,
+    {
+        let target = &item;
         let gt_res = if *target.global_transform == GlobalTransform::default() {
             self.transform_helper
                 .compute_global_transform(target.entity)
         } else {
             Ok(*target.global_transform)
         };
-        gt_res.expect(error_msg)
+        gt_res.unwrap_or_else(|err| {
+            panic!(
+                "failed to get GlobalTransform for {} - {err:?}",
+                T::component_name()
+            )
+        })
     }
+
+    pub fn target_get_or_compute_global_transform(&self) -> GlobalTransform {
+        self.get_or_compute_global_transform::<Target>(&self.target_q)
+    }
+
+    pub fn parent_get_or_compute_global_transform(&self) -> GlobalTransform {
+        self.get_or_compute_global_transform::<Parent>(&self.parent_q)
+    }
+
+    pub fn spawn_in(&mut self, bundle: impl Bundle, transform: Option<Transform>) -> Entity {
+        let transform = transform.unwrap_or_default();
+        let target_global_transform = self.target_get_or_compute_global_transform();
+
+        let parent_global_transform = self.parent_get_or_compute_global_transform();
+
+        let transform_target = target_global_transform.reparented_to(&parent_global_transform);
+        // remove scale before applying transform and re-add it back
+        let final_transform =
+            (transform.with_scale(Vec3::splat(1.0)) * transform_target).with_scale(transform.scale);
+        let child = self.commands.spawn(bundle).insert(final_transform).id();
+        self.commands.entity(self.parent_q.entity).add_child(child);
+        child
+    }
+}
+
+#[derive(SystemParam)]
+pub struct GameWorldMarkerSystemParam<'w, 's> {
+    pub player_spawn: SpawnHelper<'w, 's, GameWorld, PlayerSpawnMarker>,
+    pub enemy_spawn: SpawnHelper<'w, 's, GameWorld, EnemySpawnMarker>,
+}
+
+impl GameWorldMarkerSystemParam<'_, '_> {
     pub fn spawn_in_player_spawn(
         &mut self,
         bundle: impl Bundle,
         transform: Option<Transform>,
     ) -> Entity {
-        let transform = transform.unwrap_or_default();
-        let player_spawn_global_transform =
-            self.get_or_compute_global_transform(&self.player_spawn, "PlayerSpawnMarker");
-
-        let game_world_global_transform =
-            self.get_or_compute_global_transform(&self.game_world, "GameWorld");
-
-        let transform_target =
-            player_spawn_global_transform.reparented_to(&game_world_global_transform);
-        // remove scale before applying transform and re-add it back
-        let final_transform =
-            (transform.with_scale(Vec3::splat(1.0)) * transform_target).with_scale(transform.scale);
-        let child = self.commands.spawn(bundle).insert(final_transform).id();
-        self.commands
-            .entity(self.game_world.entity)
-            .add_child(child);
-        child
+        self.player_spawn.spawn_in(bundle, transform)
     }
 
     pub fn spawn_in_enemy_spawn(
@@ -216,23 +286,7 @@ impl GameWorldMarkerSystemParam<'_, '_> {
         bundle: impl Bundle,
         transform: Option<Transform>,
     ) -> Entity {
-        let transform = transform.unwrap_or_default();
-        let enemy_spawn_global_transform =
-            self.get_or_compute_global_transform(&self.enemy_spawn, "EnemySpawnMarker");
-
-        let game_world_global_transform =
-            self.get_or_compute_global_transform(&self.game_world, "GameWorld");
-
-        let transform_target =
-            enemy_spawn_global_transform.reparented_to(&game_world_global_transform);
-        // remove scale before applying transform and re-add it back
-        let final_transform =
-            (transform.with_scale(Vec3::splat(1.0)) * transform_target).with_scale(transform.scale);
-        let child = self.commands.spawn(bundle).insert(final_transform).id();
-        self.commands
-            .entity(self.game_world.entity)
-            .add_child(child);
-        child
+        self.enemy_spawn.spawn_in(bundle, transform)
     }
 }
 
