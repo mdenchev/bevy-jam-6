@@ -35,6 +35,27 @@ pub struct PlayerSpawnMarker;
 pub struct OutOfBoundsMarker;
 
 #[auto_register_type]
+#[auto_name]
+#[derive(Component, Debug, Default, Copy, Clone, Reflect)]
+#[reflect(Component)]
+#[require(Transform)]
+pub struct TemplePillar;
+
+#[auto_register_type]
+#[auto_name]
+#[derive(Component, Debug, Default, Copy, Clone, Reflect)]
+#[reflect(Component)]
+#[require(Transform)]
+pub struct TempleRoof;
+
+#[auto_register_type]
+#[auto_name]
+#[derive(Component, Debug, Default, Copy, Clone, Reflect)]
+#[reflect(Component)]
+#[require(Transform)]
+pub struct TempleLight;
+
+#[auto_register_type]
 #[auto_add_event]
 #[derive(Event, Debug, Default, Copy, Clone, Reflect)]
 pub struct LoadFinishedEvent;
