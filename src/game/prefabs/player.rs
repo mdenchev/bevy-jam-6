@@ -1,9 +1,12 @@
 use crate::game::asset_tracking::LoadResource;
+use crate::game::camera::CameraTarget;
+use crate::game::effects::lightning_ball::LightningBall;
+use crate::game::prefabs::bowling_ball::BowlingBall;
 use crate::game::prefabs::game_world::GameWorld;
 use crate::game::prefabs::game_world_markers::{
     BowlingBallSpawnMarker, ComponentName, EntityWithGlobalTransformQueryData, SpawnHelper,
 };
-use avian3d::prelude::RigidBody;
+use avian3d::prelude::{ExternalAngularImpulse, ExternalImpulse, Mass, RigidBody};
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
@@ -58,6 +61,21 @@ impl PlayerSystemParam<'_, '_> {
         transform: Option<Transform>,
     ) -> Entity {
         self.bowling_ball_spawn.spawn_in(bundle, transform)
+    }
+    pub fn spawn_bowling_ball(&mut self, power: f32, accuracy_offset_radians: f32) -> Entity {
+        let player_rot = self.get_player_rotation();
+        let accuracy_rot = player_rot * Quat::from_rotation_y(accuracy_offset_radians);
+        let bowling_ball = self.spawn_bowling_ball_spawn(
+            (
+                BowlingBall,
+                LightningBall,
+                ExternalAngularImpulse::new(accuracy_rot * (Vec3::X * 10.0 * power)),
+                ExternalImpulse::new(accuracy_rot * (Vec3::Z * 1000.0 * power)),
+                Mass(20.0),
+            ),
+            Some(Transform::from_scale(Vec3::splat(20.0))),
+        );
+        bowling_ball
     }
 }
 
