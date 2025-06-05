@@ -32,6 +32,13 @@ pub struct PlayerSpawnMarker;
 #[derive(Component, Debug, Default, Copy, Clone, Reflect)]
 #[reflect(Component)]
 #[require(Transform)]
+pub struct BowlingBallSpawnMarker;
+
+#[auto_register_type]
+#[auto_name]
+#[derive(Component, Debug, Default, Copy, Clone, Reflect)]
+#[reflect(Component)]
+#[require(Transform)]
 pub struct OutOfBoundsMarker;
 
 #[auto_register_type]
@@ -56,9 +63,9 @@ pub struct TempleRoof;
 pub struct TempleLight;
 
 #[auto_register_type]
-#[auto_add_event]
-#[derive(Event, Debug, Default, Copy, Clone, Reflect)]
-pub struct LoadFinishedEvent;
+#[derive(Component, Debug, Default, Copy, Clone, Reflect)]
+#[reflect(Component)]
+struct ColliderDisabled;
 
 #[auto_register_type]
 #[derive(Debug, Default, Copy, Clone, Reflect)]
@@ -229,5 +236,14 @@ impl GameWorldMarkerSystemParam<'_, '_> {
     }
 }
 
+fn on_add_collider_disabled(trigger: Trigger<OnAdd, ColliderDisabled>, mut commands: Commands) {
+    commands
+        .entity(trigger.target())
+        .remove::<ColliderDisabled>()
+        .insert(avian3d::prelude::ColliderDisabled);
+}
+
 #[auto_plugin(app=app)]
-pub(crate) fn plugin(app: &mut App) {}
+pub(crate) fn plugin(app: &mut App) {
+    app.add_observer(on_add_collider_disabled);
+}
