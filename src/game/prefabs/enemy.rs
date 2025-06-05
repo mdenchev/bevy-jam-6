@@ -1,30 +1,43 @@
 use avian3d::prelude::CollisionEventsEnabled;
+use rand::seq::IndexedRandom;
 use std::f32::consts::PI;
 use std::time::Duration;
 
 use crate::game::behaviors::MovementSpeed;
 use crate::game::behaviors::target_ent::TargetEnt;
 use crate::game::prefabs::bowling_ball::BowlingBall;
+use crate::game::rng::global::GlobalRng;
+use crate::game::screens::Screen;
 use crate::game::{asset_tracking::LoadResource, behaviors::despawn::Despawn};
-use avian3d::prelude::{
-    CenterOfMass, Collider, CollisionStarted, Collisions, LockedAxes, RigidBody,
-};
+use avian3d::prelude::{CenterOfMass, Collider, CollisionStarted, Collisions, RigidBody};
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
-use itertools::Itertools;
 
 #[auto_register_type]
 #[derive(Resource, Asset, Debug, Clone, Reflect)]
 pub struct EnemyAssets {
     #[dependency]
     pub base_skele: Handle<Gltf>,
+    // https://pixabay.com/sound-effects/bone-snap-295399/
+    #[dependency]
+    pub bone_snap_1: Handle<AudioSource>,
+    // https://pixabay.com/sound-effects/bone-break-sound-269658/
+    #[dependency]
+    pub bone_snap_2: Handle<AudioSource>,
+    pub bone_snap_sounds: Vec<Handle<AudioSource>>,
 }
 
 impl FromWorld for EnemyAssets {
     fn from_world(world: &mut World) -> Self {
         let assets = world.resource::<AssetServer>();
+        let bone_snap_1 = assets.load("audio/sound_effects/bone-snap-1.mp3");
+        let bone_snap_2 = assets.load("audio/sound_effects/bone-snap-2.mp3");
+        let bone_snap_sounds = vec![bone_snap_1.clone(), bone_snap_2.clone()];
         Self {
             base_skele: assets.load("models/enemies/LowPolySkeletonRigged.glb"),
+            bone_snap_1,
+            bone_snap_2,
+            bone_snap_sounds,
         }
     }
 }
@@ -51,7 +64,10 @@ impl Enemy {
 pub(crate) fn plugin(app: &mut App) {
     app.load_resource::<EnemyAssets>();
     app.add_observer(on_enemy_added);
-    app.add_systems(Update, collision_force_check);
+    app.add_systems(
+        Update,
+        collision_force_check.run_if(in_state(Screen::Gameplay)),
+    );
 }
 
 fn on_enemy_added(
@@ -96,6 +112,8 @@ fn on_enemy_added(
 fn collision_force_check(
     mut commands: Commands,
     mut collision_started: EventReader<CollisionStarted>,
+    mut rng: GlobalRng,
+    enemy_assets: Res<EnemyAssets>,
     collisions: Collisions,
     enemies: Query<Entity, With<Enemy>>,
     bowling_balls: Query<Entity, With<BowlingBall>>,
@@ -124,6 +142,13 @@ fn collision_force_check(
             commands
                 .entity(skele)
                 .remove::<TargetEnt>()
+                .insert(AudioPlayer::new(
+                    enemy_assets
+                        .bone_snap_sounds
+                        .choose(rng.rng())
+                        .unwrap()
+                        .clone(),
+                ))
                 .insert(Despawn {
                     ttl: Duration::from_secs_f32(1.0),
                 });

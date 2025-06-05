@@ -8,7 +8,7 @@ edition = "2024"
 
 [dependencies]
 avian3d = { git = "https://github.com/Jondolf/avian", branch = "main", features = ["enhanced-determinism"] }
-bevy = { version = "0.16", features = ["glam_assert", "serialize"] }
+bevy = { version = "0.16", features = ["glam_assert", "serialize", "mp3"] }
 bevy_auto_plugin = { version = "0.2.1", features = ["nightly_pre_2025_04_16"] }
 bevy_frame_count_log_prefix = { git = "https://github.com/StrikeForceZero/bevy_frame_count_log_prefix", branch = "main", features = ["fixed_update"], optional = true }
 bevy_rand = { version = "0.11", features = ["bevy_reflect", "serialize", "wyrand"] }
