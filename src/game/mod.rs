@@ -65,9 +65,10 @@ impl Plugin for GamePlugin {
         app.add_plugins(asset_tracking::plugin);
         app.add_plugins(pause_controller::plugin);
         app.add_plugins(physics::plugin);
-        app.add_plugins(prefabs::plugin);
+        app.add_plugins(snapshot::plugin);
         app.add_plugins(behaviors::plugin);
         app.add_plugins(effects::plugin);
+        app.add_plugins(prefabs::plugin);
         app.add_plugins(scenes::plugin);
         app.add_plugins(audio::plugin);
         app.add_plugins(theme::plugin);

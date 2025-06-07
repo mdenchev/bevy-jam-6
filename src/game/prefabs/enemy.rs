@@ -1,20 +1,25 @@
-use avian3d::prelude::CollisionEventsEnabled;
-use rand::seq::IndexedRandom;
+use avian3d::prelude::{CollisionEventsEnabled, Gravity};
 use std::f32::consts::PI;
-use std::time::Duration;
 
-use crate::game::behaviors::MovementSpeed;
+use crate::game::asset_tracking::LoadResource;
+use crate::game::behaviors::dynamic_character_controller::{
+    ControllerGravity, DynamicCharacterController, MaxSlopeAngle,
+};
+use crate::game::behaviors::enemy_controller::EnemyController;
+use crate::game::behaviors::grounded::Groundable;
+use crate::game::behaviors::knocked_over::KnockedOverAngle;
 use crate::game::behaviors::target_ent::TargetEnt;
+use crate::game::behaviors::zap_stuns::ZapStunTime;
+use crate::game::behaviors::{MaxMovementSpeed, MovementSpeed};
+use crate::game::effects::break_down_gltf::BreakableGltfs;
 use crate::game::prefabs::bowling_ball::BowlingBall;
 use crate::game::rng::global::GlobalRng;
-use crate::game::scenes::LevelData;
 use crate::game::screens::Screen;
-use crate::game::{asset_tracking::LoadResource, behaviors::despawn::Despawn};
 use avian3d::prelude::{CenterOfMass, Collider, CollisionStarted, Collisions, RigidBody};
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
-
-use super::game_world_markers::TempleBase;
+use rand::prelude::IndexedRandom;
+use std::fmt::Debug;
 
 #[auto_register_type]
 #[derive(Resource, Asset, Debug, Clone, Reflect)]
@@ -32,12 +37,20 @@ pub struct EnemyAssets {
 
 impl FromWorld for EnemyAssets {
     fn from_world(world: &mut World) -> Self {
+        let gltf_handle = {
+            let assets = world.resource::<AssetServer>();
+            let gltf_handle = assets.load("models/enemies/LowPolySkeletonRigged.glb");
+            world
+                .resource_mut::<BreakableGltfs>()
+                .add(gltf_handle.clone());
+            gltf_handle
+        };
         let assets = world.resource::<AssetServer>();
         let bone_snap_1 = assets.load("audio/sound_effects/bone-snap-1.mp3");
         let bone_snap_2 = assets.load("audio/sound_effects/bone-snap-2.mp3");
         let bone_snap_sounds = vec![bone_snap_1.clone(), bone_snap_2.clone()];
         Self {
-            base_skele: assets.load("models/enemies/LowPolySkeletonRigged.glb"),
+            base_skele: gltf_handle,
             bone_snap_1,
             bone_snap_2,
             bone_snap_sounds,
@@ -55,22 +68,36 @@ pub enum Enemy {
     BaseSkele,
 }
 
+#[auto_register_type]
+#[auto_add_event]
+#[derive(Event, Debug, Default, Copy, Clone, Reflect)]
+pub struct PlayBoneSnap;
+
+const DEFAULT_MOVE_SPEED: f32 = 30.0;
+const DEFAULT_STUN_TIME: f32 = 2.0;
+const DEFAULT_DESPAWN_AFTER_DEAD_SECS: f32 = 5.0;
+
 impl Enemy {
     pub fn default_move_speed(&self) -> f32 {
         match self {
-            Self::BaseSkele => 20.0,
+            Self::BaseSkele => DEFAULT_MOVE_SPEED,
         }
     }
-}
-
-#[auto_plugin(app=app)]
-pub(crate) fn plugin(app: &mut App) {
-    app.load_resource::<EnemyAssets>();
-    app.add_observer(on_enemy_added);
-    app.add_systems(
-        Update,
-        collision_force_check.run_if(in_state(Screen::Gameplay)),
-    );
+    pub fn default_max_move_speed(&self) -> f32 {
+        match self {
+            Self::BaseSkele => DEFAULT_MOVE_SPEED,
+        }
+    }
+    pub fn default_stun_time(&self) -> f32 {
+        match self {
+            Self::BaseSkele => DEFAULT_STUN_TIME,
+        }
+    }
+    pub fn default_despawn_time(&self) -> f32 {
+        match self {
+            Self::BaseSkele => DEFAULT_DESPAWN_AFTER_DEAD_SECS,
+        }
+    }
 }
 
 fn on_enemy_added(
@@ -79,6 +106,7 @@ fn on_enemy_added(
     enemy_assets: Res<EnemyAssets>,
     gltfs: Res<Assets<Gltf>>,
     mut commands: Commands,
+    gravity: Res<Gravity>,
 ) {
     let enemy = query
         .get(trigger.target())
@@ -94,6 +122,7 @@ fn on_enemy_added(
 
     // MovementSpeed
     let movement_speed = MovementSpeed(enemy.default_move_speed());
+    let max_movement_speed = MaxMovementSpeed(enemy.default_max_move_speed());
 
     commands.entity(trigger.target()).insert((
         children![(
@@ -108,63 +137,27 @@ fn on_enemy_added(
         Collider::capsule(0.25, 3.0),
         CenterOfMass::new(0.0, -5.5, 0.0),
         RigidBody::Dynamic,
+        EnemyController,
         movement_speed,
+        max_movement_speed,
+        DynamicCharacterController,
+        Groundable,
+        KnockedOverAngle(75_f32.to_radians()),
+        ZapStunTime(enemy.default_stun_time()),
+        ControllerGravity::from(gravity),
+        MaxSlopeAngle(60_f32.to_radians()),
     ));
 }
 
 fn collision_force_check(
     mut commands: Commands,
     mut collision_started: EventReader<CollisionStarted>,
-    mut rng: GlobalRng,
-    enemy_assets: Res<EnemyAssets>,
-    mut level_data: ResMut<LevelData>,
     collisions: Collisions,
     enemies: Query<Entity, With<Enemy>>,
     bowling_balls: Query<Entity, With<BowlingBall>>,
-    temple_base_q: Single<Entity, With<TempleBase>>,
-    children_q: Query<&Children>,
 ) {
-    let temple_base = temple_base_q.into_inner();
-    let mut temple_ents = vec![temple_base];
-    for ent in children_q.iter_descendants(temple_base) {
-        temple_ents.push(ent);
-    }
     for &CollisionStarted(entity_a, entity_b) in collision_started.read() {
         let collided_entities = [entity_a, entity_b];
-
-        let temple_collision_opt = collided_entities
-            .iter()
-            .find(|e| temple_ents.contains(e))
-            .cloned();
-
-        // Enemy reached the temple
-        if temple_collision_opt.is_some() && collided_entities.iter().any(|&e| enemies.contains(e))
-        {
-            // Deal damage to temple
-            level_data.temple_health = level_data.temple_health.saturating_sub(1);
-
-            // Determine which one is the skele ent
-            let skele = match temple_collision_opt.unwrap() == entity_a {
-                false => entity_a,
-                true => entity_b,
-            };
-
-            // Remove movement and add despawn timer
-            commands
-                .entity(skele)
-                .remove::<TargetEnt>()
-                .insert(AudioPlayer::new(
-                    enemy_assets
-                        .bone_snap_sounds
-                        .choose(rng.rng())
-                        .unwrap()
-                        .clone(),
-                ))
-                .insert(Despawn {
-                    ttl: Duration::from_secs_f32(0.2),
-                });
-        }
-
         if !collided_entities
             .iter()
             .all(|&e| enemies.contains(e) || bowling_balls.contains(e))
@@ -184,19 +177,34 @@ fn collision_force_check(
             // TODO: only remove if enough force
             // TODO: if don't calc force for skele <-> skele
             //  we should make it so skele's maintain formation instead of converging and bumping into each other
-            commands
-                .entity(skele)
-                .remove::<TargetEnt>()
-                .insert(AudioPlayer::new(
-                    enemy_assets
-                        .bone_snap_sounds
-                        .choose(rng.rng())
-                        .unwrap()
-                        .clone(),
-                ))
-                .insert(Despawn {
-                    ttl: Duration::from_secs_f32(1.0),
-                });
+            commands.entity(skele).remove::<TargetEnt>();
         }
     }
+}
+
+fn play_bone_snap(
+    _trigger: Trigger<PlayBoneSnap>,
+    mut global_rng: GlobalRng,
+    mut commands: Commands,
+    enemy_assets: Res<EnemyAssets>,
+) {
+    /// TODO: spawn in world or state scope?
+    commands.spawn(AudioPlayer::new(
+        enemy_assets
+            .bone_snap_sounds
+            .choose(global_rng.rng())
+            .unwrap()
+            .clone(),
+    ));
+}
+
+#[auto_plugin(app=app)]
+pub(crate) fn plugin(app: &mut App) {
+    app.load_resource::<EnemyAssets>();
+    app.add_observer(on_enemy_added);
+    app.add_observer(play_bone_snap);
+    app.add_systems(
+        Update,
+        collision_force_check.run_if(in_state(Screen::Gameplay)),
+    );
 }

@@ -11,6 +11,7 @@ use crate::game::prefabs::game_world_markers::{
 use crate::game::prefabs::player::{Player, PlayerSystemParam};
 use crate::game::screens::Screen;
 use crate::game::utils::extensions::vec2::Vec2Ext;
+use crate::game::utils::quat;
 use avian3d::prelude::{ExternalAngularImpulse, ExternalImpulse, Friction, Mass};
 use bevy::pbr::{CascadeShadowConfigBuilder, DirectionalLightShadowMap};
 use bevy::prelude::*;
@@ -67,9 +68,8 @@ fn spawn_extras_on_instance_ready(
                 Mass(1.0),
                 Friction::new(0.4),
                 TargetEnt {
-                    // TODO: spawn point doesnt work?
-                    target_ent: player, // game_world_marker.player_spawn.entity,
-                    within_distance: 10.0,
+                    target_ent: game_world_marker.player_spawn.target_entity(),
+                    within_distance: 25.0,
                 },
             ),
             Some(Transform::from_scale(Vec3::splat(4.0)).with_translation(pos.to_vec3())),
@@ -160,36 +160,13 @@ fn demo_input(
     }
 }
 
-// TODO: move
-fn get_pitch_and_roll(quat: Quat) -> (f32, f32) {
-    // Local forward and right vectors
-    let local_forward = Vec3::Z;
-    let local_right = Vec3::X;
-
-    // Transform to world space
-    let world_forward = quat * local_forward;
-    let world_right = quat * local_right;
-
-    // Pitch: angle between forward vector and horizontal plane (XZ)
-    let pitch = world_forward
-        .y
-        .atan2((world_forward.x.powi(2) + world_forward.z.powi(2)).sqrt());
-
-    // Roll: angle between right vector and horizontal plane (YZ)
-    let roll = world_right
-        .y
-        .atan2((world_right.x.powi(2) + world_right.z.powi(2)).sqrt());
-
-    (pitch, roll)
-}
-
 fn hide_roof(
     mut commands: Commands,
     roof: Single<(Entity, &Visibility), With<TempleRoof>>,
     light: Single<(Entity, &Visibility), With<TempleLight>>,
     main_camera: Single<EntityWithGlobalTransformQueryData, With<MainCamera>>,
 ) {
-    let (pitch, roll) = get_pitch_and_roll(main_camera.global_transform.rotation());
+    let (pitch, _roll) = quat::get_pitch_and_roll(main_camera.global_transform.rotation());
     let past_threshold = pitch >= 0.24;
     let mut toggle_visibility = |(entity, visibility): (Entity, &Visibility)| {
         if past_threshold && matches!(visibility, Visibility::Visible | Visibility::Inherited) {
