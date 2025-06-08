@@ -58,7 +58,7 @@ fn spawn_hud_elements(mut commands: Commands, asset_server: Res<AssetServer>) {
     );
     commands.spawn((
         Node {
-            width: Val::Px(600.0),
+            width: Val::Px(800.0),
             height: Val::Px(200.0),
             left: Val::Px(20.0),
             position_type: PositionType::Absolute,
