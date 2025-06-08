@@ -8,7 +8,6 @@ fn spawn_end_menu(mut commands: Commands, ld: Res<LevelData>) {
         widget::ui_root("End"),
         GlobalZIndex(2),
         StateScoped(Menu::End),
-        #[cfg(not(target_family = "wasm"))]
         children![
             (
                 Text::new(format!("Zeus sent {} skeles back to Hades!", ld.kill_count)),
