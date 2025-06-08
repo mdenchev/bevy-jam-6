@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use crate::game::asset_tracking::LoadResource;
+use crate::game::audio::sound_effect;
 use crate::game::behaviors::despawn::Despawn;
 use crate::game::camera::CameraTarget;
 use crate::game::effects::lightning_ball::LightningBall;
@@ -11,6 +12,7 @@ use crate::game::prefabs::game_world_markers::{
 };
 use crate::game::rng::global::GlobalRng;
 use avian3d::prelude::{Collider, ExternalAngularImpulse, ExternalImpulse, Mass, RigidBody};
+use bevy::audio::PlaybackMode;
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
@@ -60,6 +62,7 @@ impl FromWorld for PlayerAssets {
 
 #[derive(SystemParam)]
 pub struct PlayerSystemParam<'w, 's> {
+    commands: Commands<'w, 's>,
     pub player_transform: Single<'w, Ref<'static, Transform>, With<Player>>,
     player: SpawnHelper<'w, 's, GameWorld, Player>,
     player_assets: Res<'w, PlayerAssets>,
@@ -85,7 +88,9 @@ impl PlayerSystemParam<'_, '_> {
         let player_rot = self.get_player_rotation();
         let accuracy_rot = player_rot * Quat::from_rotation_y(accuracy_offset_radians);
         let rng = self.rng.rng();
-        let audio = AudioPlayer::new(self.player_assets.throw_sounds.choose(rng).unwrap().clone());
+        self.commands.spawn(sound_effect(
+            self.player_assets.throw_sounds.choose(rng).unwrap().clone(),
+        ));
         let bowling_ball = self.spawn_bowling_ball_spawn(
             (
                 BowlingBall,
@@ -97,7 +102,6 @@ impl PlayerSystemParam<'_, '_> {
                 Despawn {
                     ttl: Duration::from_secs_f32(10.0),
                 },
-                audio,
             ),
             Some(Transform::from_scale(Vec3::splat(20.0))),
         );

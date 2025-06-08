@@ -2,6 +2,7 @@ use avian3d::prelude::{CollisionEventsEnabled, Gravity};
 use std::f32::consts::PI;
 
 use crate::game::asset_tracking::LoadResource;
+use crate::game::audio::sound_effect;
 use crate::game::behaviors::dynamic_character_controller::{
     ControllerGravity, DynamicCharacterController, MaxSlopeAngle,
 };
@@ -16,6 +17,7 @@ use crate::game::prefabs::bowling_ball::BowlingBall;
 use crate::game::rng::global::GlobalRng;
 use crate::game::screens::Screen;
 use avian3d::prelude::{CenterOfMass, Collider, CollisionStarted, Collisions, RigidBody};
+use bevy::audio::PlaybackMode;
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
 use rand::prelude::IndexedRandom;
@@ -189,7 +191,7 @@ fn play_bone_snap(
     enemy_assets: Res<EnemyAssets>,
 ) {
     /// TODO: spawn in world or state scope?
-    commands.spawn(AudioPlayer::new(
+    commands.spawn(sound_effect(
         enemy_assets
             .bone_snap_sounds
             .choose(global_rng.rng())
