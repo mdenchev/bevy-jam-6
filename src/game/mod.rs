@@ -34,7 +34,6 @@ use bevy_auto_plugin::auto_plugin::*;
 use bevy_egui::EguiPlugin;
 #[cfg(feature = "dev_frame_count_log")]
 use bevy_frame_count_log_prefix::prelude::FrameCountLogPrefixPlugin;
-use bevy_hanabi::HanabiPlugin;
 use bevy_skein::SkeinPlugin;
 
 pub struct GamePlugin;
@@ -52,7 +51,6 @@ impl Plugin for GamePlugin {
         app.add_plugins(EguiPlugin {
             enable_multipass_for_primary_context: false,
         });
-        app.add_plugins(HanabiPlugin);
         app.add_plugins(SkeinPlugin::default());
 
         // Internal

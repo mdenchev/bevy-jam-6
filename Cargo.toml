@@ -16,8 +16,6 @@ bevy_prng = { version = "0.11", features = ["bevy_reflect", "serialize", "wyrand
 rand = { version = "0.9", features = ["serde"] }
 bevy_egui = { version = "0.34", features = ["serde"] }
 bevy_panorbit_camera = { version = "0.26", features = ["bevy_egui"] }
-# bevy_hanabi hasn't published 1.16 yet (https://discord.com/channels/691052431525675048/1036006050526142514/1370844642647478373)
-bevy_hanabi = { git = "https://github.com/djeedai/bevy_hanabi", branch = "main" }
 # unreleased version with support for immutable components
 bevy-inspector-egui = { git = "https://github.com/StrikeForceZero/bevy-inspector-egui", branch = "dev/edit_immutable_components", features = ["highlight_changes"], optional = true }
 egui_dock = { version = "0.16", optional = true }
