@@ -1,3 +1,4 @@
+pub mod ball_counter;
 pub mod dead;
 pub mod despawn;
 pub mod dynamic_character_controller;
@@ -41,16 +42,17 @@ pub fn clamp_velocity_to_max_xz(orig_vel: LinearVelocity, max_speed: f32) -> Lin
 
 #[auto_plugin(app=app)]
 pub(crate) fn plugin(app: &mut App) {
-    app.add_plugins(stopwatch::plugin);
-    app.add_plugins(despawn::plugin);
-    app.add_plugins(spawn::plugin);
-    app.add_plugins(restore_data::plugin);
-    app.add_plugins(target_ent::plugin);
-    app.add_plugins(grounded::plugin);
+    app.add_plugins(ball_counter::plugin);
     app.add_plugins(dynamic_character_controller::plugin);
-    app.add_plugins(stun::plugin);
-    app.add_plugins(zap_stuns::plugin);
-    app.add_plugins(knocked_over::plugin);
     app.add_plugins(dead::plugin);
+    app.add_plugins(despawn::plugin);
     app.add_plugins(enemy_controller::plugin);
+    app.add_plugins(grounded::plugin);
+    app.add_plugins(knocked_over::plugin);
+    app.add_plugins(spawn::plugin);
+    app.add_plugins(stopwatch::plugin);
+    app.add_plugins(stun::plugin);
+    app.add_plugins(target_ent::plugin);
+    app.add_plugins(restore_data::plugin);
+    app.add_plugins(zap_stuns::plugin);
 }
