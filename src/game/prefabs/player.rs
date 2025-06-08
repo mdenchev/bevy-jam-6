@@ -11,6 +11,7 @@ use crate::game::prefabs::game_world_markers::{
     BowlingBallSpawnMarker, ComponentName, EntityWithGlobalTransformQueryData, SpawnHelper,
 };
 use crate::game::rng::global::GlobalRng;
+use crate::game::scenes::LevelData;
 use avian3d::prelude::{Collider, ExternalAngularImpulse, ExternalImpulse, Mass, RigidBody};
 use bevy::audio::PlaybackMode;
 use bevy::ecs::system::SystemParam;

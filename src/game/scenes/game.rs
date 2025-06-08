@@ -20,6 +20,8 @@ use bevy_auto_plugin::auto_plugin::*;
 use smart_default::SmartDefault;
 use std::ops::{Deref, DerefMut};
 
+use super::LevelData;
+
 #[auto_register_type]
 #[auto_name]
 #[derive(Component, Debug, Copy, Clone, Reflect)]
@@ -60,7 +62,7 @@ fn spawn_extras_on_instance_ready(
     info!("spawning player");
     let player = game_world_marker.spawn_in_player_spawn(Player, None);
     info!("spawning enemies");
-    for pos in generate_pin_layout(5.0, 0.5, 3, Facing::Toward) {
+    for pos in generate_pin_layout(5.0, 0.5, 5, Facing::Toward) {
         game_world_marker.spawn_in_enemy_spawn(
             (
                 Enemy::BaseSkele,
@@ -69,7 +71,7 @@ fn spawn_extras_on_instance_ready(
                 Friction::new(0.4),
                 TargetEnt {
                     target_ent: game_world_marker.player_spawn.target_entity(),
-                    within_distance: 25.0,
+                    within_distance: 10.0,
                 },
             ),
             Some(Transform::from_scale(Vec3::splat(4.0)).with_translation(pos.to_vec3())),
@@ -83,7 +85,7 @@ struct DemoCache {
     power: f32,
     #[default = 0.0]
     accuracy: f32,
-    #[default = 1.0]
+    #[default = 30.0]
     turn_rate: f32,
 }
 fn demo_input(
@@ -91,6 +93,7 @@ fn demo_input(
     mut commands: Commands,
     mut local: Local<(bool, DemoCache)>,
     mut player_system_param: PlayerSystemParam,
+    mut level_data: ResMut<LevelData>,
     button_input: Res<ButtonInput<KeyCode>>,
 ) {
     let mut apply_transform = |transform: Transform| {
@@ -156,7 +159,10 @@ fn demo_input(
         );
     }
     if button_input.just_pressed(KeyCode::Space) {
-        player_system_param.spawn_bowling_ball(cache.power, cache.accuracy);
+        if level_data.balls_left > 0 {
+            player_system_param.spawn_bowling_ball(cache.power, cache.accuracy);
+            level_data.balls_left -= 1;
+        }
     }
 }
 

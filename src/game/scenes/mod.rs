@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
 use smart_default::SmartDefault;
@@ -11,6 +13,13 @@ pub mod ui;
 pub struct LevelData {
     #[default(20)]
     pub temple_health: usize,
+    pub kill_count: usize,
+    #[default(2)]
+    pub balls_left: usize,
+    #[default(Duration::from_secs_f32(5.0))]
+    pub new_ball_rate: Duration,
+    #[default(Duration::from_secs_f32(5.0))]
+    pub time_to_new_ball: Duration,
 }
 
 #[auto_plugin(app=app)]

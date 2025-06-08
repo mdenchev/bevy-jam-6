@@ -21,7 +21,6 @@ use bevy::ecs::query::QueryData;
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
-use rand::prelude::IndexedRandom;
 use std::time::Duration;
 
 #[auto_register_type]
@@ -85,7 +84,7 @@ struct EnemySystemParam<'w, 's> {
     knocked_over_sp: KnockedOverSystemParams<'w, 's>,
 }
 
-fn process_knocked_over(mut commands: Commands, enemy_sp: EnemySystemParam) {
+fn process_knocked_over(mut commands: Commands, mut level_data: ResMut<LevelData>,  enemy_sp: EnemySystemParam) {
     for item in enemy_sp.knocked_over_enemy_q.iter() {
         if !item
             .knocked_over
@@ -102,6 +101,9 @@ fn process_knocked_over(mut commands: Commands, enemy_sp: EnemySystemParam) {
             item.knocked_over.current_pitch_angle().to_degrees(),
             item.knocked_over.knocked_over_angle.0.to_degrees()
         );
+
+        level_data.kill_count += 1;
+
         commands
             .entity(item.enemy.entity)
             // prevents knocked over from updating
@@ -186,8 +188,6 @@ fn collision_force_check(
                 false => entity_a,
                 true => entity_b,
             };
-
-            debug!("temple collision with skele {skele}");
 
             // Remove movement and add despawn timer
             commands
