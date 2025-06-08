@@ -56,6 +56,20 @@ fn spawn_hud_elements(mut commands: Commands, asset_server: Res<AssetServer>) {
             settings.sampler = ImageSampler::nearest();
         },
     );
+    let skull_image = asset_server.load_with_settings(
+        "images/skull.png",
+        |settings: &mut ImageLoaderSettings| {
+            // Need to use nearest filtering to avoid bleeding between the slices with tiling
+            settings.sampler = ImageSampler::nearest();
+        },
+    );
+    let balling_ball_image = asset_server.load_with_settings(
+        "images/balling_ball.png",
+        |settings: &mut ImageLoaderSettings| {
+            // Need to use nearest filtering to avoid bleeding between the slices with tiling
+            settings.sampler = ImageSampler::nearest();
+        },
+    );
     commands.spawn((
         Node {
             width: Val::Px(800.0),
@@ -69,6 +83,7 @@ fn spawn_hud_elements(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         StateScoped(Screen::Gameplay),
         children![
+            // Temple health
             ImageNode {
                 image: temple_image.clone(),
                 ..default()
@@ -79,28 +94,24 @@ fn spawn_hud_elements(mut commands: Commands, asset_server: Res<AssetServer>) {
                 BorderColor(Color::BLACK),
                 TempleHealthUi,
             ),
-            // Spacer; todo figure out flex param to get same effect
-            (Text::new("        "),),
-            // TODO replace with icon
-            (
-                Text::new("Kills: "),
-                TextColor::WHITE,
-                BorderColor(Color::BLACK),
-            ),
+            (Text::new("        "),), // spacer
+            // Kill count
+            ImageNode {
+                image: skull_image.clone(),
+                ..default()
+            },
             (
                 Text::new(""),
                 TextColor::WHITE,
                 BorderColor(Color::BLACK),
                 KillCountUI,
             ),
-            // Spacer; todo figure out flex param to get same effect
-            (Text::new("        "),),
-            // TODO replace with icon
-            (
-                Text::new("Balls: "),
-                TextColor::WHITE,
-                BorderColor(Color::BLACK),
-            ),
+            (Text::new("        "),), // spacer
+            // Ball count
+            ImageNode {
+                image: balling_ball_image.clone(),
+                ..default()
+            },
             (
                 Text::new(""),
                 TextColor::WHITE,
