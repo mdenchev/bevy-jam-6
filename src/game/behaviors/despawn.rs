@@ -12,6 +12,14 @@ pub struct Despawn {
     pub ttl: Duration,
 }
 
+impl Despawn {
+    pub fn in_seconds(secs: f32) -> Self {
+        Self {
+            ttl: Duration::from_secs_f32(secs),
+        }
+    }
+}
+
 fn despawn(mut commands: Commands, time: Res<Time>, mut despawns: Query<(Entity, &mut Despawn)>) {
     for (entity, mut despawn) in despawns.iter_mut() {
         despawn.ttl = despawn.ttl.saturating_sub(time.delta());

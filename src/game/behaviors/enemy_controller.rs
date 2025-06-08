@@ -1,4 +1,4 @@
-use crate::game::behaviors::dead::{Dead, DeadAndDespawnIn, DeadAt, DeadQueryData};
+use crate::game::behaviors::dead::{Dead, DeadFor, DeadQueryData};
 use crate::game::behaviors::despawn::Despawn;
 use crate::game::behaviors::knocked_over::{
     KnockedOver, KnockedOverQueryData, KnockedOverSystemParams,
@@ -106,7 +106,10 @@ fn process_knocked_over(mut commands: Commands, enemy_sp: EnemySystemParam) {
             .entity(item.enemy.entity)
             // prevents knocked over from updating
             .remove::<KnockedOver>()
-            .insert(DeadAndDespawnIn(item.enemy.enemy.default_despawn_time()));
+            .insert((
+                Dead,
+                Despawn::in_seconds(item.enemy.enemy.default_despawn_time()),
+            ));
     }
 }
 
@@ -126,13 +129,14 @@ fn process_dead(mut commands: Commands, mut enemy_sp: EnemySystemParam) {
         for bone in enemy_sp.break_gltf_sp.break_gltf(entity, true) {
             let despawn_in = item
                 .dead
-                .dead_and_despawn_in_opt
+                .despawn
                 .as_ref()
-                .map(|item| item.0)
+                .map(|item| item.ttl.as_secs_f32())
                 .unwrap_or(item.enemy.enemy.default_despawn_time());
             commands.entity(bone).insert((
                 Bone(entity),
-                DeadAndDespawnIn(despawn_in),
+                Dead,
+                Despawn::in_seconds(despawn_in),
                 RigidBody::Dynamic,
                 ColliderConstructor::ConvexHullFromMesh,
                 Restitution::new(0.001),
@@ -183,6 +187,8 @@ fn collision_force_check(
                 true => entity_b,
             };
 
+            debug!("temple collision with skele {skele}");
+
             // Remove movement and add despawn timer
             commands
                 .entity(skele)
@@ -203,6 +209,10 @@ fn collision_force_check(
         }
         if collided_entities.iter().all(|&e| bowling_balls.contains(e)) {
             // skip ball <-> ball
+            continue;
+        }
+        if collided_entities.iter().all(|&e| enemies.contains(e)) {
+            // skip skele <-> skele
             continue;
         }
         for skele in [entity_a, entity_b]
