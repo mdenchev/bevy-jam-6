@@ -1,7 +1,6 @@
 use crate::game::asset_tracking::LoadResource;
+use avian3d::prelude::RigidBody;
 use avian3d::prelude::{Collider, Friction, Mass, Restitution};
-use avian3d::prelude::{ColliderDisabled, RigidBody};
-use bevy::ecs::query::QueryData;
 use bevy::prelude::*;
 use bevy_auto_plugin::auto_plugin::*;
 
@@ -39,34 +38,16 @@ pub(crate) fn plugin(app: &mut App) {
     app.add_observer(on_added);
 }
 
-#[derive(QueryData)]
-struct BowlingBallQueryData {
-    friction: Option<&'static Friction>,
-    restitution: Option<&'static Restitution>,
-    mass: Option<&'static Mass>,
-}
-
 fn on_added(
     trigger: Trigger<OnAdd, BowlingBall>,
     assets: Res<BowlingBallAssets>,
-    bowling_ball_q: Query<BowlingBallQueryData, With<BowlingBall>>,
     mut commands: Commands,
 ) {
-    let entity = trigger.target();
-    let mut entity_cmds = commands.entity(entity);
-    entity_cmds.insert((
+    commands.entity(trigger.target()).insert((
         Collider::sphere(BOWLING_BALL_RADIUS),
         SceneRoot(assets.bowling_ball.clone()),
+        Friction::new(0.1),
+        Restitution::new(0.41),
+        Mass(50.0),
     ));
-    let bb = bowling_ball_q.get(entity).expect("impossible");
-
-    if bb.friction.is_none() {
-        entity_cmds.insert(Friction::new(0.4));
-    }
-    if bb.restitution.is_none() {
-        entity_cmds.insert(Restitution::new(0.001));
-    }
-    if bb.mass.is_none() {
-        entity_cmds.insert(Mass(5.0));
-    }
 }

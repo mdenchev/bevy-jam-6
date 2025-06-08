@@ -21,6 +21,7 @@ pub struct GameWorldAssets {
 
 impl FromWorld for GameWorldAssets {
     fn from_world(world: &mut World) -> Self {
+        info!("Loading GameWorldAssets");
         let assets = world.resource::<AssetServer>();
         Self {
             scene: assets.load(GltfAssetLabel::Scene(0).from_asset("models/world/world.glb")),

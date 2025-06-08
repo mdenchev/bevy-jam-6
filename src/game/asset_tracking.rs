@@ -50,6 +50,11 @@ pub struct ResourceHandles {
 impl ResourceHandles {
     /// Returns true if all requested [`Asset`]s have finished loading and are available as [`Resource`]s.
     pub fn is_all_done(&self) -> bool {
+        // info!(
+        //     "done {}, waiting {}",
+        //     self.finished.len(),
+        //     self.waiting.len()
+        // );
         self.waiting.is_empty()
     }
 }
