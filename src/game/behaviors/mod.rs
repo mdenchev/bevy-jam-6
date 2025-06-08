@@ -43,6 +43,7 @@ pub fn clamp_velocity_to_max_xz(orig_vel: LinearVelocity, max_speed: f32) -> Lin
 pub(crate) fn plugin(app: &mut App) {
     app.add_plugins(despawn::plugin);
     app.add_plugins(spawn::plugin);
+    app.add_plugins(restore_data::plugin);
     app.add_plugins(target_ent::plugin);
     app.add_plugins(grounded::plugin);
     app.add_plugins(dynamic_character_controller::plugin);
