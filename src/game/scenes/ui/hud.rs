@@ -6,7 +6,7 @@ use bevy::{
 };
 use bevy_auto_plugin::auto_plugin::*;
 
-use crate::game::scenes::LevelData;
+use crate::game::{scenes::LevelData, screens::Screen};
 
 #[derive(Component, Clone, Copy)]
 pub struct TempleHealthUi;
@@ -67,6 +67,7 @@ fn spawn_hud_elements(mut commands: Commands, asset_server: Res<AssetServer>) {
             align_content: AlignContent::FlexEnd,
             ..default()
         },
+        StateScoped(Screen::Gameplay),
         children![
             ImageNode {
                 image: temple_image.clone(),
@@ -118,8 +119,11 @@ fn spawn_hud_elements(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 #[auto_plugin(app=app)]
 pub(crate) fn plugin(app: &mut App) {
-    app.add_systems(Startup, spawn_hud_elements);
-    app.add_systems(Update, update_temple_health);
-    app.add_systems(Update, update_kill_count);
-    app.add_systems(Update, update_ball_count);
+    app.add_systems(OnEnter(Screen::Gameplay), spawn_hud_elements);
+    app.add_systems(
+        Update,
+        update_temple_health.run_if(in_state(Screen::Gameplay)),
+    );
+    app.add_systems(Update, update_kill_count.run_if(in_state(Screen::Gameplay)));
+    app.add_systems(Update, update_ball_count.run_if(in_state(Screen::Gameplay)));
 }

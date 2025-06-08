@@ -2,6 +2,7 @@ pub mod ball_counter;
 pub mod dead;
 pub mod despawn;
 pub mod dynamic_character_controller;
+pub mod end_game;
 pub mod enemy_controller;
 pub mod grounded;
 pub mod knocked_over;
@@ -46,6 +47,7 @@ pub(crate) fn plugin(app: &mut App) {
     app.add_plugins(dynamic_character_controller::plugin);
     app.add_plugins(dead::plugin);
     app.add_plugins(despawn::plugin);
+    app.add_plugins(end_game::plugin);
     app.add_plugins(enemy_controller::plugin);
     app.add_plugins(grounded::plugin);
     app.add_plugins(knocked_over::plugin);

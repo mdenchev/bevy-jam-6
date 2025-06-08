@@ -1,5 +1,6 @@
 //! The game's main screen states and transitions between them.
 
+mod end;
 mod gameplay;
 pub mod loading;
 mod skein_server;
@@ -21,11 +22,13 @@ pub enum Screen {
     Loading,
     Gameplay,
     SkeinServer,
+    End,
 }
 
 #[auto_plugin(app=app)]
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins((
+        end::plugin,
         gameplay::plugin,
         loading::plugin,
         splash::plugin,

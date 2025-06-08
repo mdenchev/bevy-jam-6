@@ -11,7 +11,7 @@ pub mod ui;
 #[auto_init_resource]
 #[derive(Resource, SmartDefault, Debug, Clone, Reflect)]
 pub struct LevelData {
-    #[default(20)]
+    #[default(1)]
     pub temple_health: usize,
     pub kill_count: usize,
     #[default(2)]
