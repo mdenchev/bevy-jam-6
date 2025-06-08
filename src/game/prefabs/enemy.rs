@@ -151,39 +151,6 @@ fn on_enemy_added(
     ));
 }
 
-fn collision_force_check(
-    mut commands: Commands,
-    mut collision_started: EventReader<CollisionStarted>,
-    collisions: Collisions,
-    enemies: Query<Entity, With<Enemy>>,
-    bowling_balls: Query<Entity, With<BowlingBall>>,
-) {
-    for &CollisionStarted(entity_a, entity_b) in collision_started.read() {
-        let collided_entities = [entity_a, entity_b];
-        if !collided_entities
-            .iter()
-            .all(|&e| enemies.contains(e) || bowling_balls.contains(e))
-        {
-            // not skele <-> skele
-            // not ball <-> skele
-            continue;
-        }
-        if collided_entities.iter().all(|&e| bowling_balls.contains(e)) {
-            // skip ball <-> ball
-            continue;
-        }
-        for skele in [entity_a, entity_b]
-            .into_iter()
-            .filter_map(|e| enemies.get(e).ok())
-        {
-            // TODO: only remove if enough force
-            // TODO: if don't calc force for skele <-> skele
-            //  we should make it so skele's maintain formation instead of converging and bumping into each other
-            commands.entity(skele).remove::<TargetEnt>();
-        }
-    }
-}
-
 fn play_bone_snap(
     _trigger: Trigger<PlayBoneSnap>,
     mut global_rng: GlobalRng,
@@ -205,8 +172,4 @@ pub(crate) fn plugin(app: &mut App) {
     app.load_resource::<EnemyAssets>();
     app.add_observer(on_enemy_added);
     app.add_observer(play_bone_snap);
-    app.add_systems(
-        Update,
-        collision_force_check.run_if(in_state(Screen::Gameplay)),
-    );
 }
