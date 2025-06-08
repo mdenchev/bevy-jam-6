@@ -29,7 +29,7 @@ use std::fmt::Debug;
 #[derive(Resource, Asset, Debug, Clone, Reflect)]
 pub struct EnemyAssets {
     #[dependency]
-    pub base_skele: Handle<Gltf>,
+    pub base_skele: Handle<Scene>,
     // https://pixabay.com/sound-effects/bone-snap-295399/
     #[dependency]
     pub bone_snap_1: Handle<AudioSource>,
@@ -41,20 +41,14 @@ pub struct EnemyAssets {
 
 impl FromWorld for EnemyAssets {
     fn from_world(world: &mut World) -> Self {
-        let gltf_handle = {
-            let assets = world.resource::<AssetServer>();
-            let gltf_handle = assets.load("models/enemies/LowPolySkeletonRigged.glb");
-            world
-                .resource_mut::<BreakableGltfs>()
-                .add(gltf_handle.clone());
-            gltf_handle
-        };
         let assets = world.resource::<AssetServer>();
+        let base_skele = assets
+            .load(GltfAssetLabel::Scene(0).from_asset("models/enemies/LowPolySkeletonRigged.glb"));
         let bone_snap_1 = assets.load("audio/sound_effects/bone-snap-1.mp3");
         let bone_snap_2 = assets.load("audio/sound_effects/bone-snap-2.mp3");
         let bone_snap_sounds = vec![bone_snap_1.clone(), bone_snap_2.clone()];
         Self {
-            base_skele: gltf_handle,
+            base_skele,
             bone_snap_1,
             bone_snap_2,
             bone_snap_sounds,
@@ -117,13 +111,7 @@ fn on_enemy_added(
         .get(trigger.target())
         .expect("No target entity for trigger");
 
-    // Model handle
-    let gltf_h = match *enemy {
-        Enemy::BaseSkele => enemy_assets.base_skele.clone(),
-    };
-    let gltf = gltfs
-        .get(&gltf_h)
-        .unwrap_or_else(|| panic!("Missing gltf asset for {:?}", enemy));
+    let skele = SceneRoot(enemy_assets.base_skele.clone());
 
     // MovementSpeed
     let movement_speed = MovementSpeed(enemy.default_move_speed());
@@ -132,10 +120,7 @@ fn on_enemy_added(
     commands
         .entity(trigger.target())
         .insert((
-            children![(
-                SceneRoot(gltf.scenes[0].clone()),
-                Transform::from_translation(Vec3::Y * -1.75),
-            ),],
+            children![(skele, Transform::from_translation(Vec3::Y * -1.75),),],
             // Parry colliders are centered around origin. Meshes have lowest
             // vertex at y=0.0. Spawning the collider allows us to adjust
             // its position to match the mesh.
