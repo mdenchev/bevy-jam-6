@@ -1,21 +1,27 @@
 use crate::game::behaviors::dead::{Dead, DeadFor, DeadQueryData};
 use crate::game::behaviors::despawn::Despawn;
+use crate::game::behaviors::dynamic_character_controller::DynamicCharacterController;
 use crate::game::behaviors::knocked_over::{
     KnockedOver, KnockedOverQueryData, KnockedOverSystemParams,
 };
+use crate::game::behaviors::pin_joint::{DisablePinJoints, EnablePinJoints};
 use crate::game::behaviors::restore_data::RestorableQueryData;
-use crate::game::behaviors::stun::{OnStunned, OnUnStunned, StunSystemParam};
+use crate::game::behaviors::spawn_group::{
+    SpawnGroup, SpawnGroupItem, SpawnGroupItemQueryData, SpawnGroupQueryData,
+};
+use crate::game::behaviors::stun::{OnStunned, OnUnStunned, StunSystemParam, StunTime, Stunned};
 use crate::game::behaviors::target_ent::TargetEnt;
-use crate::game::effects::break_down_gltf::BreakGltfSystemParam;
+use crate::game::effects::break_down_gltf::{BreakGltfParams, BreakGltfSystemParam};
 use crate::game::prefabs::bowling_ball::BowlingBall;
 use crate::game::prefabs::enemy::{Enemy, EnemyAssets, PlayBoneSnap};
-use crate::game::prefabs::game_world_markers::TempleBase;
+use crate::game::prefabs::game_world::GameWorld;
+use crate::game::prefabs::game_world_markers::{GameWorldMarkerSystemParam, TempleBase};
 use crate::game::rng::global::GlobalRng;
 use crate::game::scenes::LevelData;
 use crate::game::screens::Screen;
 use avian3d::prelude::{
     AngularDamping, AngularVelocity, ColliderConstructor, CollisionStarted, Collisions,
-    LinearDamping, LinearVelocity, LockedAxes, Restitution, RigidBody,
+    LinearDamping, LinearVelocity, LockedAxes, Restitution, RigidBody, SphericalJoint,
 };
 use bevy::ecs::query::QueryData;
 use bevy::ecs::system::SystemParam;
@@ -40,6 +46,7 @@ pub struct Bone(Entity);
 struct EnemyQueryData {
     entity: Entity,
     enemy: &'static Enemy,
+    spawn_group_item: &'static SpawnGroupItem,
     target_ent: RestorableQueryData<TargetEnt>,
     locked_axes: RestorableQueryData<LockedAxes>,
 }
@@ -108,6 +115,8 @@ fn process_knocked_over(mut commands: Commands, mut level_data: ResMut<LevelData
             .entity(item.enemy.entity)
             // prevents knocked over from updating
             .remove::<KnockedOver>()
+            // prevents unstunning
+            .remove::<Stunned>()
             .insert((
                 Dead,
                 Despawn::in_seconds(item.enemy.enemy.default_despawn_time()),
@@ -115,7 +124,11 @@ fn process_knocked_over(mut commands: Commands, mut level_data: ResMut<LevelData
     }
 }
 
-fn process_dead(mut commands: Commands, mut enemy_sp: EnemySystemParam) {
+fn process_dead(
+    mut commands: Commands,
+    mut enemy_sp: EnemySystemParam,
+    game_world: Single<Entity, With<GameWorld>>,
+) {
     for item in enemy_sp.dead_q.iter() {
         if !item.dead.dead.is_added() {
             continue;
@@ -128,7 +141,13 @@ fn process_dead(mut commands: Commands, mut enemy_sp: EnemySystemParam) {
             (LinearVelocity::default(), AngularVelocity::default())
         };
 
-        for bone in enemy_sp.break_gltf_sp.break_gltf(entity, true) {
+        for bone in enemy_sp.break_gltf_sp.break_gltf(
+            entity,
+            BreakGltfParams {
+                new_parent: Some(*game_world),
+                ..Default::default()
+            },
+        ) {
             let despawn_in = item
                 .dead
                 .despawn
@@ -194,6 +213,7 @@ fn collision_force_check(
                 .entity(skele)
                 .remove::<TargetEnt>()
                 .trigger(PlayBoneSnap)
+                .trigger(DisablePinJoints)
                 .insert(Despawn {
                     ttl: Duration::from_secs_f32(0.2),
                 });
@@ -240,6 +260,7 @@ fn on_stunned(
         .get(entity)
         .expect("Trigger<OnStunned> failed to resolve item - impossible");
     item.store_and_remove(&mut commands.entity(entity));
+    commands.entity(entity).trigger(DisablePinJoints);
 }
 
 fn on_unstunned(
@@ -253,6 +274,7 @@ fn on_unstunned(
         .get(entity)
         .expect("Trigger<OnUnStunned> failed to resolve item - impossible");
     item.restore(&mut commands.entity(entity));
+    commands.entity(entity).trigger(EnablePinJoints);
 }
 
 fn on_add_enemy_controller(trigger: Trigger<OnAdd, EnemyController>, mut commands: Commands) {
