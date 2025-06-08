@@ -213,6 +213,7 @@ fn collision_force_check(
         }
         if collided_entities.iter().all(|&e| enemies.contains(e)) {
             // skip skele <-> skele
+            // TODO: check kinetic force or create a joint based formation
             continue;
         }
         for skele in [entity_a, entity_b]
